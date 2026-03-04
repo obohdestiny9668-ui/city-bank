@@ -109,11 +109,12 @@
 
         <!-- International Transfer Section -->
         <div id="internationalSection" class="transfer-section hidden">
-            <div class="section">
+            <!-- Payment Method Selection -->
+            <div id="paymentMethodSelection" class="section">
                 <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Select Payment Method</h3>
-                
+
                 <div class="payment-methods">
-                    <div class="payment-method" onclick="selectMethod('wire')">
+                    <div class="payment-method active" onclick="selectMethod('wire')">
                         <div class="payment-icon"><i class="fas fa-university"></i></div>
                         <span>Wire Transfer</span>
                     </div>
@@ -133,15 +134,6 @@
                         <div class="payment-icon green"><i class="fas fa-dollar-sign"></i></div>
                         <span>Cash App</span>
                     </div>
-                    <div class="payment-method" onclick="selectMethod('more')">
-                        <div class="payment-icon"><i class="fas fa-ellipsis-h"></i></div>
-                        <span>More Options</span>
-                    </div>
-                </div>
-
-                <h3 style="font-size: 14px; color: var(--text-muted); margin: 24px 0 16px;">Additional Methods</h3>
-                
-                <div class="payment-methods">
                     <div class="payment-method" onclick="selectMethod('skrill')">
                         <div class="payment-icon purple"><i class="fas fa-wallet"></i></div>
                         <span>Skrill</span>
@@ -158,15 +150,481 @@
                         <div class="payment-icon pink"><i class="fas fa-credit-card"></i></div>
                         <span>Revolut</span>
                     </div>
-                    <div class="payment-method" onclick="selectMethod('alipay')">
-                        <div class="payment-icon blue"><i class="fas fa-qrcode"></i></div>
-                        <span>Alipay</span>
+                </div>
+            </div>
+
+            <!-- Wire Transfer Form -->
+            <div id="wireTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small"><i class="fas fa-university"></i></div>
+                        <span>Wire Transfer</span>
                     </div>
-                    <div class="payment-method" onclick="selectMethod('wechat')">
-                        <div class="payment-icon green"><i class="fas fa-comment"></i></div>
-                        <span>WeChat Pay</span>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">From</label>
+                    <div class="account-select">
+                        <div class="account-option active">
+                            <div class="account-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="account-info">
+                                <div class="account-name">Fiat Account</div>
+                                <div class="account-balance user-balance">$64,600.00</div>
+                            </div>
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        </div>
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="wireAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Beneficiary Details</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="wireBeneficiaryName" class="form-input" placeholder="Beneficiary Full Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Bank Information</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-university"></i>
+                        <input type="text" id="wireBankName" class="form-input" placeholder="Bank Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="wireBankAddress" class="form-input" placeholder="Bank Address">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" id="wireAccountNumber" class="form-input" placeholder="Account Number / IBAN">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-code"></i>
+                        <input type="text" id="wireSwiftCode" class="form-input" placeholder="SWIFT/BIC Code">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="wireTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <div class="transfer-info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <div>
+                        <p>International wire transfers typically take 1-5 business days to process.</p>
+                        <p>A processing fee of $25 may apply.</p>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendWireTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send Wire Transfer
+                </button>
+            </div>
+
+            <!-- Cryptocurrency Form -->
+            <div id="cryptoTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small orange"><i class="fab fa-bitcoin"></i></div>
+                        <span>Cryptocurrency</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Select Cryptocurrency</label>
+                    <div class="crypto-options">
+                        <div class="crypto-option active" onclick="selectCrypto('BTC')">
+                            <i class="fab fa-bitcoin" style="color: #f7931a;"></i>
+                            <span>Bitcoin (BTC)</span>
+                        </div>
+                        <div class="crypto-option" onclick="selectCrypto('ETH')">
+                            <i class="fab fa-ethereum" style="color: #627eea;"></i>
+                            <span>Ethereum (ETH)</span>
+                        </div>
+                        <div class="crypto-option" onclick="selectCrypto('USDT')">
+                            <i class="fas fa-coins" style="color: #26a17b;"></i>
+                            <span>Tether (USDT)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount (USD)</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="cryptoAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Wallet Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-wallet"></i>
+                        <input type="text" id="cryptoWalletAddress" class="form-input" placeholder="Enter wallet address">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="cryptoTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendCryptoTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send Crypto
+                </button>
+            </div>
+
+            <!-- PayPal Form -->
+            <div id="paypalTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small blue"><i class="fab fa-paypal"></i></div>
+                        <span>PayPal</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="paypalAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">PayPal Email</label>
+                    <div class="input-wrapper">
+                        <i class="fab fa-paypal"></i>
+                        <input type="email" id="paypalEmail" class="form-input" placeholder="recipient@paypal.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="paypalTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendPayPalTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via PayPal
+                </button>
+            </div>
+
+            <!-- Wise Transfer Form -->
+            <div id="wiseTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small green"><i class="fas fa-exchange-alt"></i></div>
+                        <span>Wise Transfer</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="wiseAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Recipient Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="wiseEmail" class="form-input" placeholder="recipient@email.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Recipient Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="wiseRecipientName" class="form-input" placeholder="Full Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="wiseTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendWiseTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via Wise
+                </button>
+            </div>
+
+            <!-- Cash App Form -->
+            <div id="cashappTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small green"><i class="fas fa-dollar-sign"></i></div>
+                        <span>Cash App</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="cashappAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">$Cashtag</label>
+                    <div class="input-wrapper">
+                        <span style="padding-left: 16px; color: var(--text-muted);">$</span>
+                        <input type="text" id="cashappTag" class="form-input" placeholder="cashtag">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="cashappTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendCashAppTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via Cash App
+                </button>
+            </div>
+
+            <!-- Skrill Form -->
+            <div id="skrillTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small purple"><i class="fas fa-wallet"></i></div>
+                        <span>Skrill</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="skrillAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Skrill Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="skrillEmail" class="form-input" placeholder="recipient@email.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="skrillTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendSkrillTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via Skrill
+                </button>
+            </div>
+
+            <!-- Venmo Form -->
+            <div id="venmoTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small blue"><i class="fas fa-hand-holding-usd"></i></div>
+                        <span>Venmo</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="venmoAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Venmo Username</label>
+                    <div class="input-wrapper">
+                        <span style="padding-left: 16px; color: var(--text-muted);">@</span>
+                        <input type="text" id="venmoUsername" class="form-input" placeholder="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="venmoTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendVenmoTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via Venmo
+                </button>
+            </div>
+
+            <!-- Zelle Form -->
+            <div id="zelleTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small purple"><i class="fas fa-bolt"></i></div>
+                        <span>Zelle</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="zelleAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email or Phone</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="zelleRecipient" class="form-input" placeholder="email@example.com or phone">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Recipient Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="zelleRecipientName" class="form-input" placeholder="Full Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="zelleTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendZelleTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via Zelle
+                </button>
+            </div>
+
+            <!-- Revolut Form -->
+            <div id="revolutTransferForm" class="section hidden">
+                <div class="selected-method-header">
+                    <button class="back-to-methods" onclick="showPaymentMethods()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="selected-method-info">
+                        <div class="payment-icon small pink"><i class="fas fa-credit-card"></i></div>
+                        <span>Revolut</span>
+                    </div>
+                    <div style="width: 40px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="revolutAmount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Revolut Username or Phone</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="revolutRecipient" class="form-input" placeholder="@username or phone">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="revolutTransferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendRevolutTransfer()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send via Revolut
+                </button>
             </div>
         </div>
 
@@ -202,12 +660,18 @@
     </div>
 
     <script src="firebase-config.js"></script>
+
     <script>
+        let currentUser = null;
+        let selectedCrypto = 'BTC';
+        let currentMethod = 'wire';
+
         // Check auth
         auth.onAuthStateChanged((user) => {
             if (!user) {
                 window.location.href = 'login.html';
             } else {
+                currentUser = user;
                 loadUserData(user.uid);
             }
         });
@@ -229,75 +693,477 @@
         function switchTab(tab) {
             document.querySelectorAll('.transfer-tab').forEach(t => t.classList.remove('active'));
             event.target.closest('.transfer-tab').classList.add('active');
-            
+
             document.getElementById('localSection').classList.toggle('hidden', tab !== 'local');
             document.getElementById('internationalSection').classList.toggle('hidden', tab !== 'international');
+
+            if (tab === 'international') {
+                showPaymentMethods();
+            }
         }
 
         function selectMethod(method) {
-            showToast(`${method} transfer coming soon!`, 'info');
+            currentMethod = method;
+            document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Hide method selection and show appropriate form
+            document.getElementById('paymentMethodSelection').classList.add('hidden');
+
+            // Hide all forms
+            document.getElementById('wireTransferForm').classList.add('hidden');
+            document.getElementById('cryptoTransferForm').classList.add('hidden');
+            document.getElementById('paypalTransferForm').classList.add('hidden');
+            document.getElementById('wiseTransferForm').classList.add('hidden');
+            document.getElementById('cashappTransferForm').classList.add('hidden');
+            document.getElementById('skrillTransferForm').classList.add('hidden');
+            document.getElementById('venmoTransferForm').classList.add('hidden');
+            document.getElementById('zelleTransferForm').classList.add('hidden');
+            document.getElementById('revolutTransferForm').classList.add('hidden');
+
+            // Show selected form
+            const formMap = {
+                'wire': 'wireTransferForm',
+                'crypto': 'cryptoTransferForm',
+                'paypal': 'paypalTransferForm',
+                'wise': 'wiseTransferForm',
+                'cashapp': 'cashappTransferForm',
+                'skrill': 'skrillTransferForm',
+                'venmo': 'venmoTransferForm',
+                'zelle': 'zelleTransferForm',
+                'revolut': 'revolutTransferForm'
+            };
+
+            if (formMap[method]) {
+                document.getElementById(formMap[method]).classList.remove('hidden');
+            }
+        }
+
+        function showPaymentMethods() {
+            document.getElementById('paymentMethodSelection').classList.remove('hidden');
+            document.getElementById('wireTransferForm').classList.add('hidden');
+            document.getElementById('cryptoTransferForm').classList.add('hidden');
+            document.getElementById('paypalTransferForm').classList.add('hidden');
+            document.getElementById('wiseTransferForm').classList.add('hidden');
+            document.getElementById('cashappTransferForm').classList.add('hidden');
+            document.getElementById('skrillTransferForm').classList.add('hidden');
+            document.getElementById('venmoTransferForm').classList.add('hidden');
+            document.getElementById('zelleTransferForm').classList.add('hidden');
+            document.getElementById('revolutTransferForm').classList.add('hidden');
+        }
+
+        function selectCrypto(crypto) {
+            selectedCrypto = crypto;
+            document.querySelectorAll('.crypto-option').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        // Wire Transfer Function
+        async function sendWireTransfer() {
+            const amount = parseFloat(document.getElementById('wireAmount').value);
+            const beneficiaryName = document.getElementById('wireBeneficiaryName').value;
+            const bankName = document.getElementById('wireBankName').value;
+            const bankAddress = document.getElementById('wireBankAddress').value;
+            const accountNumber = document.getElementById('wireAccountNumber').value;
+            const swiftCode = document.getElementById('wireSwiftCode').value;
+            const pin = document.getElementById('wireTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!beneficiaryName || !bankName || !accountNumber || !swiftCode) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Wire Transfer',
+                beneficiaryName,
+                bankName,
+                bankAddress,
+                accountNumber,
+                swiftCode
+            });
+        }
+
+        // Crypto Transfer Function
+        async function sendCryptoTransfer() {
+            const amount = parseFloat(document.getElementById('cryptoAmount').value);
+            const walletAddress = document.getElementById('cryptoWalletAddress').value;
+            const pin = document.getElementById('cryptoTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!walletAddress) {
+                showToast('Please enter wallet address', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Cryptocurrency',
+                cryptoType: selectedCrypto,
+                walletAddress
+            });
+        }
+
+        // PayPal Transfer Function
+        async function sendPayPalTransfer() {
+            const amount = parseFloat(document.getElementById('paypalAmount').value);
+            const email = document.getElementById('paypalEmail').value;
+            const pin = document.getElementById('paypalTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!email) {
+                showToast('Please enter PayPal email', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'PayPal',
+                recipientEmail: email
+            });
+        }
+
+        // Wise Transfer Function
+        async function sendWiseTransfer() {
+            const amount = parseFloat(document.getElementById('wiseAmount').value);
+            const email = document.getElementById('wiseEmail').value;
+            const recipientName = document.getElementById('wiseRecipientName').value;
+            const pin = document.getElementById('wiseTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!email || !recipientName) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Wise Transfer',
+                recipientEmail: email,
+                recipientName
+            });
+        }
+
+        // Cash App Transfer Function
+        async function sendCashAppTransfer() {
+            const amount = parseFloat(document.getElementById('cashappAmount').value);
+            const cashtag = document.getElementById('cashappTag').value;
+            const pin = document.getElementById('cashappTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!cashtag) {
+                showToast('Please enter $Cashtag', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Cash App',
+                cashtag
+            });
+        }
+
+        // Skrill Transfer Function
+        async function sendSkrillTransfer() {
+            const amount = parseFloat(document.getElementById('skrillAmount').value);
+            const email = document.getElementById('skrillEmail').value;
+            const pin = document.getElementById('skrillTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!email) {
+                showToast('Please enter Skrill email', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Skrill',
+                recipientEmail: email
+            });
+        }
+
+        // Venmo Transfer Function
+        async function sendVenmoTransfer() {
+            const amount = parseFloat(document.getElementById('venmoAmount').value);
+            const username = document.getElementById('venmoUsername').value;
+            const pin = document.getElementById('venmoTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!username) {
+                showToast('Please enter Venmo username', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Venmo',
+                venmoUsername: username
+            });
+        }
+
+        // Zelle Transfer Function
+        async function sendZelleTransfer() {
+            const amount = parseFloat(document.getElementById('zelleAmount').value);
+            const recipient = document.getElementById('zelleRecipient').value;
+            const recipientName = document.getElementById('zelleRecipientName').value;
+            const pin = document.getElementById('zelleTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!recipient || !recipientName) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Zelle',
+                recipientContact: recipient,
+                recipientName
+            });
+        }
+
+        // Revolut Transfer Function
+        async function sendRevolutTransfer() {
+            const amount = parseFloat(document.getElementById('revolutAmount').value);
+            const recipient = document.getElementById('revolutRecipient').value;
+            const pin = document.getElementById('revolutTransferPin').value;
+
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (!recipient) {
+                showToast('Please enter Revolut username or phone', 'error');
+                return;
+            }
+
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+
+            await processInternationalTransfer({
+                amount,
+                pin,
+                method: 'Revolut',
+                recipientContact: recipient
+            });
+        }
+
+        // Generic International Transfer Processor
+        async function processInternationalTransfer(data) {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+
+            try {
+                // Get current user data
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.data();
+
+                // Verify PIN
+                if (data.pin !== userData.transferPin) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    showToast('Incorrect transfer PIN', 'error');
+                    return;
+                }
+
+                // Check balance
+                if (data.amount > (userData.balance || 0)) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    showToast('Insufficient balance', 'error');
+                    return;
+                }
+
+                // Create transaction
+                const transactionId = generateTransactionId();
+                const receiptId = generateReceiptId();
+
+                const transactionData = {
+                    transactionId: transactionId,
+                    receiptId: receiptId,
+                    senderId: currentUser.uid,
+                    senderName: `${userData.firstName} ${userData.lastName}`,
+                    senderEmail: userData.email,
+                    amount: data.amount,
+                    method: data.method,
+                    type: 'international',
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    ...data
+                };
+
+                await db.collection('transactions').doc(transactionId).set(transactionData);
+
+                // Update balance
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-data.amount)
+                });
+
+                // Create notification for user
+                await db.collection('notifications').add({
+                    userId: currentUser.uid,
+                    title: 'Transfer Sent!',
+                    message: `You sent ${formatCurrency(data.amount)} via ${data.method}`,
+                    type: 'transfer',
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                showToast('Transfer successful!', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'receipt.html?txn=' + transactionId;
+                }, 1500);
+
+            } catch (error) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                console.error('Error sending transfer:', error);
+                showToast('Transfer failed. Please try again.', 'error');
+            }
         }
 
         async function sendMoney() {
             const amount = parseFloat(document.getElementById('amount').value);
             const beneficiaryEmail = document.getElementById('beneficiaryEmail').value;
             const pin = document.getElementById('transferPin').value;
-            
+
             if (!amount || amount <= 0) {
                 showToast('Please enter a valid amount', 'error');
                 return;
             }
-            
+
             if (!beneficiaryEmail) {
                 showToast('Please enter beneficiary email', 'error');
                 return;
             }
-            
+
             if (!pin || pin.length !== 4) {
                 showToast('Please enter your 4-digit PIN', 'error');
                 return;
             }
-            
+
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            
+
             try {
                 // Get current user data
                 const userDoc = await db.collection('users').doc(currentUser.uid).get();
                 const userData = userDoc.data();
-                
+
                 // Verify PIN
                 if (pin !== userData.transferPin) {
                     document.getElementById('loadingOverlay').classList.add('hidden');
                     showToast('Incorrect transfer PIN', 'error');
                     return;
                 }
-                
+
                 // Check balance
                 if (amount > (userData.balance || 0)) {
                     document.getElementById('loadingOverlay').classList.add('hidden');
                     showToast('Insufficient balance', 'error');
                     return;
                 }
-                
+
                 // Find recipient
                 const recipientSnapshot = await db.collection('users')
                     .where('email', '==', beneficiaryEmail)
                     .limit(1)
                     .get();
-                
+
                 if (recipientSnapshot.empty) {
                     document.getElementById('loadingOverlay').classList.add('hidden');
                     showToast('Recipient not found', 'error');
                     return;
                 }
-                
+
                 const recipientDoc = recipientSnapshot.docs[0];
                 const recipientData = recipientDoc.data();
-                
+
                 // Create transaction
                 const transactionId = generateTransactionId();
                 const receiptId = generateReceiptId();
-                
+
                 await db.collection('transactions').doc(transactionId).set({
                     transactionId: transactionId,
                     receiptId: receiptId,
@@ -312,16 +1178,16 @@
                     status: 'completed',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
+
                 // Update balances
                 await db.collection('users').doc(currentUser.uid).update({
                     balance: firebase.firestore.FieldValue.increment(-amount)
                 });
-                
+
                 await db.collection('users').doc(recipientDoc.id).update({
                     balance: firebase.firestore.FieldValue.increment(amount)
                 });
-                
+
                 // Create notification
                 await db.collection('notifications').add({
                     userId: recipientDoc.id,
@@ -331,14 +1197,14 @@
                     read: false,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
+
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 showToast('Transfer successful!', 'success');
-                
+
                 setTimeout(() => {
                     window.location.href = 'receipt.html?txn=' + transactionId;
                 }, 1500);
-                
+
             } catch (error) {
                 document.getElementById('loadingOverlay').classList.add('hidden');
                 console.error('Error sending money:', error);
@@ -497,6 +1363,11 @@
             border-color: var(--primary);
         }
 
+        .payment-method.active {
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.1);
+        }
+
         .payment-icon {
             width: 48px;
             height: 48px;
@@ -509,6 +1380,12 @@
             color: var(--primary);
         }
 
+        .payment-icon.small {
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+        }
+
         .payment-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
         .payment-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
         .payment-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
@@ -519,6 +1396,83 @@
             font-size: 11px;
             color: var(--text-secondary);
             text-align: center;
+        }
+
+        .selected-method-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .back-to-methods {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .selected-method-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .transfer-info-box {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(14, 165, 233, 0.1);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+
+        .transfer-info-box i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .transfer-info-box p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .crypto-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .crypto-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .crypto-option.active {
+            border-color: var(--primary);
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .crypto-option span {
+            font-size: 13px;
+            color: var(--text-primary);
         }
     </style>
 </body>
