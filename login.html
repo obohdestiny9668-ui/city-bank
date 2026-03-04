@@ -112,69 +112,67 @@
         function socialLogin(provider) {
             showToast(`${provider} login coming soon!`, 'info');
         }
+// Login form submission
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    document.getElementById('loadingOverlay').classList.remove('hidden');
+    
+    try {
+        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            
+            await db.collection('users').doc(user.uid).update({
+                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+            });
 
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Get user data to check role
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    
-                    // Update last login
-                    await db.collection('users').doc(user.uid).update({
-                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                    
-                    // Redirect based on role
-                    if (userData.role === 'admin') {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = 'dashboard.html';
-                    }
+            document.getElementById('loadingOverlay').classList.add('hidden');
+
+            if (userData.role !== 'user') {
+                showToast("Admins must login from admin page.", "error");
+                await auth.signOut();
+                return;
+            }
+
+            window.location.href = 'dashboard.html';
+        }
+
+    } catch (error) {
+        document.getElementById('loadingOverlay').classList.add('hidden');
+        
+        let message = 'Login failed. Please try again.';
+        if (error.code === 'auth/user-not-found') message = 'No account found with this email.';
+        if (error.code === 'auth/wrong-password') message = 'Incorrect password.';
+        if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
+        if (error.code === 'auth/user-disabled') message = 'This account has been disabled.';
+        
+        showToast(message, 'error');
+    }
+});
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        db.collection('users').doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                const userData = doc.data();
+
+                if (userData.role !== 'user') {
+                    auth.signOut();
+                    return;
                 }
-            } catch (error) {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                
-                let message = 'Login failed. Please try again.';
-                if (error.code === 'auth/user-not-found') message = 'No account found with this email.';
-                if (error.code === 'auth/wrong-password') message = 'Incorrect password.';
-                if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
-                if (error.code === 'auth/user-disabled') message = 'This account has been disabled.';
-                
-                showToast(message, 'error');
-            }
-        });
 
-        // Check if already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is already logged in, redirect
-                db.collection('users').doc(user.uid).get().then((doc) => {
-                    if (doc.exists) {
-                        const userData = doc.data();
-                        if (userData.role === 'admin') {
-                            window.location.href = 'admin.html';
-                        } else {
-                            window.location.href = 'dashboard.html';
-                        }
-                    }
-                });
+                window.location.href = 'dashboard.html';
             }
         });
+    }
+});
     </script>
 </body>
 </html>
