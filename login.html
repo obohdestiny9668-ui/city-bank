@@ -93,26 +93,27 @@
     </div>
 
     <script src="firebase-config.js"></script>
-    <script>
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password i');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.classList.remove('fa-eye');
-                toggleBtn.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.classList.remove('fa-eye-slash');
-                toggleBtn.classList.add('fa-eye');
-            }
-        }
+<script>
+function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.querySelector('.toggle-password i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.classList.remove('fa-eye');
+        toggleBtn.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
+    }
+}
 
-        function socialLogin(provider) {
-            showToast(`${provider} login coming soon!`, 'info');
-        }
-// Login form submission
+function socialLogin(provider) {
+    showToast(`${provider} login coming soon!`, 'info');
+}
+
+// LOGIN FORM
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -136,13 +137,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
             document.getElementById('loadingOverlay').classList.add('hidden');
 
-            if (userData.role !== 'user') {
-                showToast("Admins must login from admin page.", "error");
-                await auth.signOut();
-                return;
+            // 🔥 ROLE-BASED REDIRECT
+            if (userData.role === 'admin') {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = 'dashboard.html';
             }
-
-            window.location.href = 'dashboard.html';
+        } else {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+            showToast("User record not found.", "error");
         }
 
     } catch (error) {
@@ -157,22 +160,22 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         showToast(message, 'error');
     }
 });
+
+// AUTO REDIRECT IF ALREADY LOGGED IN
 auth.onAuthStateChanged((user) => {
     if (user) {
         db.collection('users').doc(user.uid).get().then((doc) => {
             if (doc.exists) {
                 const userData = doc.data();
 
-                if (userData.role !== 'user') {
-                    auth.signOut();
-                    return;
+                // 🔥 ROLE-BASED REDIRECT
+                if (userData.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
                 }
-
-                window.location.href = 'dashboard.html';
             }
         });
     }
 });
-    </script>
-</body>
-</html>
+</script>
