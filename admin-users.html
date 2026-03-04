@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - City Bank Admin</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar admin-navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <span>City Bank <span class="admin-badge">ADMIN</span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="admin.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="admin-users.html" class="active"><i class="fas fa-users"></i> Users</a></li>
+            <li><a href="admin-transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+            <li><a href="admin-chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+        </ul>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="adminName">Loading...</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="page-header">
+            <h1>Manage Users</h1>
+            <p>View and manage all user accounts</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card filter-card">
+            <div class="filter-row">
+                <div class="filter-group search-group">
+                    <label>Search Users</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Search by name, email, or account number..." oninput="applyFilters()">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="statusFilter" class="form-input" onchange="applyFilters()">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="sortBy" class="form-input" onchange="applyFilters()">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="balanceHigh">Balance (High to Low)</option>
+                        <option value="balanceLow">Balance (Low to High)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">All Users</h3>
+                <span id="userCount" class="badge badge-info">0 users</span>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Account Number</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <tr>
+                            <td colspan="6" class="empty-cell">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>Loading users...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button class="btn btn-outline btn-sm" onclick="changePage(-1)" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button class="btn btn-outline btn-sm" onclick="changePage(1)" id="nextBtn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Actions Modal -->
+    <div id="userActionsModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Manage User</h3>
+                <button class="modal-close" onclick="closeUserActionsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="userActionsAlert"></div>
+            
+            <div class="user-info-card" id="modalUserInfo">
+                <!-- User info will be loaded here -->
+            </div>
+            
+            <div class="action-buttons">
+                <h4>Quick Actions</h4>
+                <div class="action-grid">
+                    <button class="action-btn" onclick="showAddBalanceToUser()">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Add Balance</span>
+                    </button>
+                    <button class="action-btn" onclick="showSubtractBalance()">
+                        <i class="fas fa-minus-circle"></i>
+                        <span>Subtract Balance</span>
+                    </button>
+                    <button class="action-btn" onclick="showResetPin()">
+                        <i class="fas fa-key"></i>
+                        <span>Reset PIN</span>
+                    </button>
+                    <button class="action-btn" onclick="toggleUserStatus()">
+                        <i class="fas fa-ban"></i>
+                        <span id="suspendBtnText">Suspend User</span>
+                    </button>
+                    <button class="action-btn" onclick="viewUserTransactions()">
+                        <i class="fas fa-list"></i>
+                        <span>View Transactions</span>
+                    </button>
+                    <button class="action-btn" onclick="chatWithUser()">
+                        <i class="fas fa-comment"></i>
+                        <span>Chat with User</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Balance Modal -->
+    <div id="addBalanceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Balance</h3>
+                <button class="modal-close" onclick="closeAddBalanceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="addBalanceAlert"></div>
+            <form id="addBalanceForm">
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="input-group">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="addBalanceAmount" class="form-input" placeholder="Enter amount" required min="1" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <div class="input-group">
+                        <i class="fas fa-comment"></i>
+                        <input type="text" id="addBalanceDescription" class="form-input" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeAddBalanceModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Balance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Subtract Balance Modal -->
+    <div id="subtractBalanceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Subtract Balance</h3>
+                <button class="modal-close" onclick="closeSubtractBalanceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="subtractBalanceAlert"></div>
+            <form id="subtractBalanceForm">
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="input-group">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="subtractBalanceAmount" class="form-input" placeholder="Enter amount" required min="1" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <div class="input-group">
+                        <i class="fas fa-comment"></i>
+                        <input type="text" id="subtractBalanceDescription" class="form-input" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeSubtractBalanceModal()">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Subtract Balance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset PIN Modal -->
+    <div id="resetPinModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Reset Transfer PIN</h3>
+                <button class="modal-close" onclick="closeResetPinModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="resetPinAlert"></div>
+            <form id="resetPinForm">
+                <div class="form-group">
+                    <label class="form-label">New PIN (4 digits)</label>
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="newUserPin" class="form-input" placeholder="Enter new 4-digit PIN" required maxlength="4" pattern="\d{4}">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeResetPinModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Reset PIN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="admin-users.js"></script>
+</body>
+</html>

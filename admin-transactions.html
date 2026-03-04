@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Transactions - City Bank Admin</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar admin-navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <span>City Bank <span class="admin-badge">ADMIN</span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="admin.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+            <li><a href="admin-transactions.html" class="active"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+            <li><a href="admin-chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+        </ul>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="adminName">Loading...</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="page-header">
+            <h1>All Transactions</h1>
+            <p>View and monitor all system transactions</p>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card filter-card">
+            <div class="filter-row">
+                <div class="filter-group search-group">
+                    <label>Search</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Search by ID, name, or email..." oninput="applyFilters()">
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="statusFilter" class="form-input" onchange="applyFilters()">
+                        <option value="all">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>From Date</label>
+                    <input type="date" id="fromDate" class="form-input" onchange="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>To Date</label>
+                    <input type="date" id="toDate" class="form-input" onchange="applyFilters()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="stats-grid summary-stats">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3>Total Volume</h3>
+                    <p id="totalVolume">$0.00</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3>Total Count</h3>
+                    <p id="totalCount">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-content">
+                    <h3>Average Amount</h3>
+                    <p id="averageAmount">$0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Transaction History</h3>
+                <button class="btn btn-outline btn-sm" onclick="exportTransactions()">
+                    <i class="fas fa-download"></i> Export CSV
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Transaction ID</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTable">
+                        <tr>
+                            <td colspan="7" class="empty-cell">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>Loading transactions...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button class="btn btn-outline btn-sm" onclick="changePage(-1)" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button class="btn btn-outline btn-sm" onclick="changePage(1)" id="nextBtn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal-overlay">
+        <div class="modal receipt-modal">
+            <div class="receipt-header">
+                <div class="receipt-logo">
+                    <i class="fas fa-university"></i>
+                    <span>City Bank</span>
+                </div>
+                <div class="receipt-status" id="receiptStatus">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Successful</span>
+                </div>
+            </div>
+            
+            <div class="receipt-body">
+                <div class="receipt-amount">
+                    <span class="label">Amount</span>
+                    <span class="amount" id="receiptAmount">$0.00</span>
+                </div>
+                
+                <div class="receipt-details">
+                    <div class="detail-row">
+                        <span class="label">Receipt ID</span>
+                        <span class="value" id="receiptId">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Transaction ID</span>
+                        <span class="value" id="receiptTxnId">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Date & Time</span>
+                        <span class="value" id="receiptDate">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">From</span>
+                        <span class="value" id="receiptSender">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">To</span>
+                        <span class="value" id="receiptReceiver">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Description</span>
+                        <span class="value" id="receiptDescription">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="receipt-footer">
+                <p>Thank you for banking with City Bank</p>
+                <p class="receipt-note">Please keep this receipt for your records</p>
+            </div>
+            
+            <div class="receipt-actions">
+                <button class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button class="btn btn-outline" onclick="closeReceipt()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="admin-transactions.js"></script>
+</body>
+</html>

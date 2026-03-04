@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - City Bank</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <span>City Bank</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+            <li><a href="transactions.html"><i class="fas fa-history"></i> Transactions</a></li>
+            <li><a href="chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+            <li><a href="profile.html" class="active"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="navUserName">Loading...</div>
+                <div class="user-role">Account Holder</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="profile-container">
+            <!-- Profile Sidebar -->
+            <div class="profile-sidebar">
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <span id="avatarInitials">--</span>
+                        <button class="avatar-edit" onclick="document.getElementById('avatarInput').click()">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <input type="file" id="avatarInput" class="hidden" accept="image/*">
+                    </div>
+                    <h3 id="profileName">Loading...</h3>
+                    <p id="profileEmail">loading@example.com</p>
+                    <span class="account-badge">Personal Account</span>
+                    
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <span class="stat-value" id="profileBalance">$0.00</span>
+                            <span class="stat-label">Balance</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value" id="profileJoinDate">-</span>
+                            <span class="stat-label">Member Since</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-menu">
+                    <button class="menu-item active" onclick="showSection('personal')">
+                        <i class="fas fa-user"></i>
+                        <span>Personal Info</span>
+                    </button>
+                    <button class="menu-item" onclick="showSection('security')">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Security</span>
+                    </button>
+                    <button class="menu-item" onclick="showSection('account')">
+                        <i class="fas fa-cog"></i>
+                        <span>Account Settings</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <!-- Personal Info Section -->
+                <div id="personalSection" class="content-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Personal Information</h3>
+                            <button class="btn btn-outline btn-sm" onclick="toggleEdit('personal')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </div>
+                        
+                        <div id="personalAlert"></div>
+                        
+                        <form id="personalForm" class="profile-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" id="firstName" class="form-input" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" id="lastName" class="form-input" disabled>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" id="email" class="form-input" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" id="phoneNumber" class="form-input" disabled>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Account Number</label>
+                                <input type="text" id="accountNumber" class="form-input" disabled readonly>
+                            </div>
+                            
+                            <div class="form-actions" id="personalActions" style="display: none;">
+                                <button type="button" class="btn btn-outline" onclick="cancelEdit('personal')">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Security Section -->
+                <div id="securitySection" class="content-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Change Password</h3>
+                        </div>
+                        
+                        <div id="passwordAlert"></div>
+                        
+                        <form id="passwordForm" class="profile-form">
+                            <div class="form-group">
+                                <label class="form-label">Current Password</label>
+                                <div class="input-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">New Password</label>
+                                <div class="input-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="newPassword" class="form-input" placeholder="Enter new password" required minlength="6">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Confirm New Password</label>
+                                <div class="input-group">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" id="confirmNewPassword" class="form-input" placeholder="Confirm new password" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Update Password</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Change Transfer PIN</h3>
+                        </div>
+                        
+                        <div id="pinAlert"></div>
+                        
+                        <form id="pinForm" class="profile-form">
+                            <div class="form-group">
+                                <label class="form-label">Current PIN</label>
+                                <div class="input-group">
+                                    <i class="fas fa-key"></i>
+                                    <input type="password" id="currentPin" class="form-input" placeholder="Enter current PIN" required maxlength="4" pattern="\d{4}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">New PIN (4 digits)</label>
+                                <div class="input-group">
+                                    <i class="fas fa-key"></i>
+                                    <input type="password" id="newPin" class="form-input" placeholder="Enter new PIN" required maxlength="4" pattern="\d{4}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Confirm New PIN</label>
+                                <div class="input-group">
+                                    <i class="fas fa-key"></i>
+                                    <input type="password" id="confirmNewPin" class="form-input" placeholder="Confirm new PIN" required maxlength="4" pattern="\d{4}">
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Update PIN</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Account Settings Section -->
+                <div id="accountSection" class="content-section hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Account Settings</h3>
+                        </div>
+                        
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Email Notifications</h4>
+                                    <p>Receive email notifications for transactions and updates</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="emailNotifications" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Transaction Alerts</h4>
+                                    <p>Get notified for all transactions</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="transactionAlerts" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <h4>Login Notifications</h4>
+                                    <p>Get notified when someone logs into your account</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="loginNotifications" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card danger-zone">
+                        <div class="card-header">
+                            <h3 class="card-title">Danger Zone</h3>
+                        </div>
+                        
+                        <div class="danger-actions">
+                            <div class="danger-item">
+                                <div class="danger-info">
+                                    <h4>Delete Account</h4>
+                                    <p>Permanently delete your account and all data</p>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="deleteAccount()">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="profile.js"></script>
+</body>
+</html>

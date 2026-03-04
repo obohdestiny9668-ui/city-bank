@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - City Bank</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="transactions.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <span>City Bank</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+            <li><a href="transfer.html"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+            <li><a href="transactions.html" class="active"><i class="fas fa-history"></i> Transactions</a></li>
+            <li><a href="chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="userName">Loading...</div>
+                <div class="user-role">Account Holder</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="page-header">
+            <h1>Transaction History</h1>
+            <div class="header-actions">
+                <button class="btn btn-outline btn-sm" onclick="exportTransactions()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="card filter-card">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Transaction Type</label>
+                    <select id="filterType" class="form-input" onchange="applyFilters()">
+                        <option value="all">All Transactions</option>
+                        <option value="sent">Sent</option>
+                        <option value="received">Received</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="filterStatus" class="form-input" onchange="applyFilters()">
+                        <option value="all">All Status</option>
+                        <option value="completed">Completed</option>
+                        <option value="pending">Pending</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>From Date</label>
+                    <input type="date" id="filterFromDate" class="form-input" onchange="applyFilters()">
+                </div>
+                <div class="filter-group">
+                    <label>To Date</label>
+                    <input type="date" id="filterToDate" class="form-input" onchange="applyFilters()">
+                </div>
+                <div class="filter-group search-group">
+                    <label>Search</label>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" class="form-input" placeholder="Search by name, email, or ID..." oninput="applyFilters()">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="card">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Transaction ID</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTable">
+                        <tr>
+                            <td colspan="7" class="empty-cell">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>Loading transactions...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <button class="btn btn-outline btn-sm" onclick="changePage(-1)" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span id="pageInfo">Page 1 of 1</span>
+                <button class="btn btn-outline btn-sm" onclick="changePage(1)" id="nextBtn">
+                    Next <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal-overlay">
+        <div class="modal receipt-modal">
+            <div class="receipt-header">
+                <div class="receipt-logo">
+                    <i class="fas fa-university"></i>
+                    <span>City Bank</span>
+                </div>
+                <div class="receipt-status" id="receiptStatus">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Successful</span>
+                </div>
+            </div>
+            
+            <div class="receipt-body">
+                <div class="receipt-amount">
+                    <span class="label">Amount</span>
+                    <span class="amount" id="receiptAmount">$0.00</span>
+                </div>
+                
+                <div class="receipt-details">
+                    <div class="detail-row">
+                        <span class="label">Receipt ID</span>
+                        <span class="value" id="receiptId">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Transaction ID</span>
+                        <span class="value" id="receiptTxnId">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Date & Time</span>
+                        <span class="value" id="receiptDate">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">From</span>
+                        <span class="value" id="receiptSender">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">To</span>
+                        <span class="value" id="receiptReceiver">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Description</span>
+                        <span class="value" id="receiptDescription">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="receipt-footer">
+                <p>Thank you for banking with City Bank</p>
+                <p class="receipt-note">Please keep this receipt for your records</p>
+            </div>
+            
+            <div class="receipt-actions">
+                <button class="btn btn-primary" onclick="printReceipt()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button class="btn btn-outline" onclick="closeReceipt()">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="transactions.js"></script>
+</body>
+</html>

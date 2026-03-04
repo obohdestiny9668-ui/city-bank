@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Chat - City Bank Admin</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="chat.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar admin-navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <span>City Bank <span class="admin-badge">ADMIN</span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="admin.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+            <li><a href="admin-transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+            <li><a href="admin-chat.html" class="active"><i class="fas fa-comments"></i> Chat</a></li>
+        </ul>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="adminName">Loading...</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="admin-chat-container">
+            <!-- Chat List Sidebar -->
+            <div class="chat-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-comments"></i> Active Chats</h3>
+                </div>
+                <div class="chat-list-container" id="chatList">
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Loading chats...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Main Area -->
+            <div class="chat-main" id="chatMain">
+                <div class="no-chat-selected" id="noChatSelected">
+                    <i class="fas fa-comments"></i>
+                    <h3>Select a chat to start messaging</h3>
+                    <p>Choose a user from the sidebar to view and respond to their messages</p>
+                </div>
+                
+                <div id="activeChat" class="hidden">
+                    <div class="chat-header">
+                        <div class="chat-user">
+                            <div class="user-avatar" id="chatUserAvatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-details">
+                                <h4 id="chatUserName">User Name</h4>
+                                <p id="chatUserEmail">user@example.com</p>
+                            </div>
+                        </div>
+                        <div class="chat-actions">
+                            <a href="#" id="viewUserProfile" class="btn btn-outline btn-sm">
+                                <i class="fas fa-user"></i> View Profile
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <form id="chatForm" class="chat-form">
+                            <div class="input-group">
+                                <button type="button" class="attachment-btn" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <input type="file" id="fileInput" class="hidden" accept="image/*">
+                                <input type="text" id="messageInput" class="form-input" placeholder="Type your message..." autocomplete="off">
+                                <button type="submit" class="send-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="admin-chat.js"></script>
+</body>
+</html>

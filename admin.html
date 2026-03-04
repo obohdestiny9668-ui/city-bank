@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - City Bank</title>
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar admin-navbar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-university"></i>
+            </div>
+            <span>City Bank <span class="admin-badge">ADMIN</span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="admin.html" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="admin-users.html"><i class="fas fa-users"></i> Users</a></li>
+            <li><a href="admin-transactions.html"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+            <li><a href="admin-chat.html"><i class="fas fa-comments"></i> Chat</a></li>
+        </ul>
+        <div class="user-menu">
+            <div class="user-info">
+                <div class="user-name" id="adminName">Loading...</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p>Manage your banking system</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Users</h3>
+                    <p id="totalUsers">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Balance</h3>
+                    <p id="totalBalance">$0.00</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon warning">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Total Transactions</h3>
+                    <p id="totalTransactions">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>Active Chats</h3>
+                    <p id="activeChats">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2>Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="admin-users.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <span>Manage Users</span>
+                </a>
+                <a href="admin-transactions.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <span>View Transactions</span>
+                </a>
+                <a href="admin-chat.html" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <span>Support Chat</span>
+                </a>
+                <button class="action-card" onclick="showAddBalanceModal()">
+                    <div class="action-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <span>Quick Add Balance</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Users</h3>
+                <a href="admin-users.html" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Account Number</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentUsersTable">
+                        <tr>
+                            <td colspan="7" class="empty-cell">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>Loading users...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Recent Transactions</h3>
+                <a href="admin-transactions.html" class="btn btn-outline btn-sm">View All</a>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Transaction ID</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentTransactionsTable">
+                        <tr>
+                            <td colspan="6" class="empty-cell">
+                                <div class="empty-state">
+                                    <i class="fas fa-inbox"></i>
+                                    <p>Loading transactions...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Balance Modal -->
+    <div id="addBalanceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Quick Add Balance</h3>
+                <button class="modal-close" onclick="closeAddBalanceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="addBalanceAlert"></div>
+            <form id="addBalanceForm">
+                <div class="form-group">
+                    <label class="form-label">User Email</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="balanceUserEmail" class="form-input" placeholder="Enter user email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="input-group">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="balanceAmount" class="form-input" placeholder="Enter amount" required min="1" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <div class="input-group">
+                        <i class="fas fa-comment"></i>
+                        <input type="text" id="balanceDescription" class="form-input" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeAddBalanceModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Balance</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
