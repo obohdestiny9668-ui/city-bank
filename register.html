@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - City Prime Bank</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Auth Header -->
+        <div class="auth-header">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="auth-logo">
+                <i class="fas fa-university"></i>
+                <span>City Prime Bank</span>
+            </div>
+            <div class="spacer"></div>
+        </div>
+
+        <!-- Register Form -->
+        <div class="auth-content">
+            <div class="auth-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join City Prime Bank today</p>
+
+            <form id="registerForm" class="auth-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="firstName" class="form-input" placeholder="First name" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="lastName" class="form-input" placeholder="Last name" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" class="form-input" placeholder="+1 (555) 000-0000" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" class="form-input" placeholder="Create password" required minlength="6">
+                    </div>
+                    <span class="form-hint">Minimum 6 characters</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN (4 digits)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="pin" class="form-input" placeholder="Create 4-digit PIN" required maxlength="4" pattern="\d{4}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-wrapper">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+
+            <div class="auth-divider">
+                <span>or continue with</span>
+            </div>
+
+            <div class="social-login">
+                <button class="social-btn" onclick="socialLogin('google')">
+                    <i class="fab fa-google"></i>
+                </button>
+                <button class="social-btn" onclick="socialLogin('apple')">
+                    <i class="fab fa-apple"></i>
+                </button>
+            </div>
+
+            <p class="auth-footer">
+                Already have an account? <a href="login.html">Sign In</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Creating account...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        function socialLogin(provider) {
+            showToast(`${provider} login coming soon!`, 'info');
+        }
+
+        // Register form submission
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const pin = document.getElementById('pin').value;
+            
+            if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+                showToast('Transfer PIN must be exactly 4 digits.', 'error');
+                return;
+            }
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            try {
+                // Create user account
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Create user document
+                await db.collection('users').doc(user.uid).set({
+                    uid: user.uid,
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phone: phone,
+                    balance: 0,
+                    transferPin: pin,
+                    role: 'user',
+                    accountNumber: generateAccountNumber(),
+                    status: 'active',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Create welcome notification
+                await db.collection('notifications').add({
+                    userId: user.uid,
+                    title: 'Welcome to City Prime Bank!',
+                    message: 'Your account has been created successfully. Start banking with us today!',
+                    type: 'welcome',
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                showToast('Account created successfully!', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+                
+            } catch (error) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                
+                let message = 'Registration failed. Please try again.';
+                if (error.code === 'auth/email-already-in-use') message = 'An account with this email already exists.';
+                if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
+                if (error.code === 'auth/weak-password') message = 'Password is too weak.';
+                
+                showToast(message, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

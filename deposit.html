@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit - City Prime Bank</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="dashboard.html" class="back-btn" style="color: var(--text-primary);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="greeting" style="flex: 1; text-align: center;">
+                <div class="greeting-name">Fund Your Account</div>
+            </div>
+            <div style="width: 40px;"></div>
+        </header>
+
+        <!-- Deposit Methods -->
+        <div class="section">
+            <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Select Deposit Method</h3>
+            
+            <div class="deposit-methods">
+                <div class="deposit-method active" onclick="selectMethod('usdt')">
+                    <div class="deposit-icon green"><i class="fas fa-coins"></i></div>
+                    <span>USDT</span>
+                </div>
+                <div class="deposit-method" onclick="selectMethod('eth')">
+                    <div class="deposit-icon purple"><i class="fab fa-ethereum"></i></div>
+                    <span>Ethereum</span>
+                </div>
+                <div class="deposit-method" onclick="selectMethod('btc')">
+                    <div class="deposit-icon orange"><i class="fab fa-bitcoin"></i></div>
+                    <span>Bitcoin</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="section">
+            <div class="qr-card">
+                <div class="qr-header">
+                    <div class="qr-icon green"><i class="fas fa-coins"></i></div>
+                    <div>
+                        <div class="qr-title">USDT Deposit</div>
+                        <div class="qr-subtitle">Tether (TRC20)</div>
+                    </div>
+                </div>
+                
+                <div class="qr-code-container">
+                    <div class="qr-code">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TXYZ1234567890ABCDEF" alt="QR Code">
+                    </div>
+                    <p class="qr-hint">Scan QR code to deposit</p>
+                </div>
+
+                <div class="wallet-address">
+                    <label>Wallet Address</label>
+                    <div class="address-box">
+                        <span id="walletAddress">TXYZ1234567890ABCDEF</span>
+                        <button class="copy-btn" onclick="copyAddress()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="deposit-info">
+                    <div class="info-item">
+                        <span class="info-label">Network</span>
+                        <span class="info-value">TRC20</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Minimum Deposit</span>
+                        <span class="info-value">10 USDT</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Processing Time</span>
+                        <span class="info-value">5-30 minutes</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Proof -->
+        <div class="section">
+            <div class="upload-card">
+                <h3 style="font-size: 14px; margin-bottom: 16px;">Upload Payment Proof</h3>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Upload a screenshot of your successful transaction</p>
+                
+                <div class="upload-area" onclick="document.getElementById('proofFile').click()">
+                    <input type="file" id="proofFile" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span>Click to upload or drag and drop</span>
+                    <small>PNG, JPG up to 5MB</small>
+                </div>
+
+                <div id="uploadPreview" class="upload-preview hidden">
+                    <img id="previewImage" src="" alt="Preview">
+                    <button class="remove-btn" onclick="removeUpload()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="submitDeposit()" style="margin-top: 16px;">
+                    <i class="fas fa-check-circle"></i> Submit Deposit
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Deposits -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">Recent Deposits</h3>
+                <a href="#" class="section-link">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon green"><i class="fas fa-arrow-down"></i></div>
+                    <div class="activity-details">
+                        <div class="activity-title">USDT Deposit</div>
+                        <div class="activity-amount">+$500.00</div>
+                        <div class="activity-date">Nov 21, 2025, 05:59</div>
+                    </div>
+                    <span class="status-badge">Completed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="activity.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Activity</span>
+            </a>
+            <a href="send.html" class="nav-item">
+                <i class="fas fa-paper-plane"></i>
+                <span>Transfer</span>
+            </a>
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="cards.html" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Cards</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Check auth
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        function selectMethod(method) {
+            document.querySelectorAll('.deposit-method').forEach(m => m.classList.remove('active'));
+            event.target.closest('.deposit-method').classList.add('active');
+            
+            const addresses = {
+                usdt: 'TXYZ1234567890ABCDEF',
+                eth: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+                btc: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
+            };
+            
+            document.getElementById('walletAddress').textContent = addresses[method];
+            showToast(`${method.toUpperCase()} selected`, 'success');
+        }
+
+        function copyAddress() {
+            const address = document.getElementById('walletAddress').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                showToast('Address copied to clipboard!', 'success');
+            });
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImage').src = e.target.result;
+                    document.getElementById('uploadPreview').classList.remove('hidden');
+                    document.querySelector('.upload-area').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeUpload() {
+            document.getElementById('proofFile').value = '';
+            document.getElementById('uploadPreview').classList.add('hidden');
+            document.querySelector('.upload-area').classList.remove('hidden');
+        }
+
+        function submitDeposit() {
+            const file = document.getElementById('proofFile').files[0];
+            if (!file) {
+                showToast('Please upload payment proof', 'error');
+                return;
+            }
+            
+            showToast('Deposit submitted for review!', 'success');
+            setTimeout(() => {
+                removeUpload();
+            }, 2000);
+        }
+    </script>
+
+    <style>
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .deposit-methods {
+            display: flex;
+            gap: 12px;
+        }
+
+        .deposit-method {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .deposit-method.active {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .deposit-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .deposit-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .deposit-icon.purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .deposit-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+
+        .deposit-method span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .qr-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .qr-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .qr-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .qr-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+        .qr-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .qr-subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .qr-code-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 12px;
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .qr-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .wallet-address {
+            margin-bottom: 20px;
+        }
+
+        .wallet-address label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .address-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .address-box span {
+            flex: 1;
+            font-family: monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .copy-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .deposit-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .upload-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+        }
+
+        .upload-area i {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .upload-area span {
+            display: block;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .upload-area small {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .upload-preview {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--danger);
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</body>
+</html>

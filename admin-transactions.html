@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Transactions - City Prime Bank Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="admin.html" class="back-btn" style="color: var(--text-primary);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="greeting" style="flex: 1; text-align: center;">
+                <div class="greeting-name">All Transactions</div>
+            </div>
+            <button class="icon-btn" onclick="exportTransactions()">
+                <i class="fas fa-download"></i>
+            </button>
+        </header>
+
+        <!-- Stats -->
+        <div class="section">
+            <div class="stats-summary">
+                <div class="stat-box">
+                    <span class="stat-label">Total Volume</span>
+                    <span class="stat-value" id="totalVolume">$0.00</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Count</span>
+                    <span class="stat-value" id="totalCount">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Average</span>
+                    <span class="stat-value" id="avgAmount">$0.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="section">
+            <div class="filter-row">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search transactions..." oninput="filterTransactions()">
+                </div>
+                <select id="statusFilter" class="filter-select" onchange="filterTransactions()">
+                    <option value="all">All Status</option>
+                    <option value="completed">Completed</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Transactions List -->
+        <div class="section">
+            <div class="transactions-list" id="transactionsList">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading transactions...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Transaction Receipt</h3>
+                <button class="close-btn" onclick="closeReceiptModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="receiptContent"></div>
+            <button class="btn btn-primary btn-block" onclick="printReceipt()">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        let allTransactions = [];
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                checkAdmin(user.uid);
+            }
+        });
+
+        async function checkAdmin(uid) {
+            const doc = await db.collection('users').doc(uid).get();
+            if (!doc.exists || doc.data().role !== 'admin') {
+                alert('Access denied');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            loadTransactions();
+        }
+
+        async function loadTransactions() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const userFilter = urlParams.get('user');
+                
+                let query = db.collection('transactions').orderBy('createdAt', 'desc');
+                
+                if (userFilter) {
+                    const sentSnapshot = await db.collection('transactions')
+                        .where('senderId', '==', userFilter)
+                        .orderBy('createdAt', 'desc')
+                        .get();
+                    
+                    const receivedSnapshot = await db.collection('transactions')
+                        .where('receiverId', '==', userFilter)
+                        .orderBy('createdAt', 'desc')
+                        .get();
+                    
+                    allTransactions = [];
+                    sentSnapshot.forEach(doc => allTransactions.push({ id: doc.id, ...doc.data() }));
+                    receivedSnapshot.forEach(doc => allTransactions.push({ id: doc.id, ...doc.data() }));
+                    allTransactions.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+                } else {
+                    const snapshot = await query.limit(100).get();
+                    allTransactions = [];
+                    snapshot.forEach(doc => allTransactions.push({ id: doc.id, ...doc.data() }));
+                }
+                
+                renderTransactions(allTransactions);
+                updateStats(allTransactions);
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        function renderTransactions(transactions) {
+            const container = document.getElementById('transactionsList');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <span>No transactions found</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = transactions.map(txn => `
+                <div class="transaction-item" onclick="viewReceipt('${txn.id}')">
+                    <div class="txn-icon ${txn.senderId === 'admin' ? 'green' : txn.senderId === currentUser?.uid ? 'red' : 'blue'}">
+                        <i class="fas fa-${txn.senderId === 'admin' ? 'arrow-down' : txn.senderId === currentUser?.uid ? 'arrow-up' : 'exchange-alt'}"></i>
+                    </div>
+                    <div class="txn-info">
+                        <span class="txn-title">${txn.description || 'Transfer'}</span>
+                        <span class="txn-users">${txn.senderName} → ${txn.receiverName}</span>
+                        <span class="txn-date">${formatDate(txn.createdAt)}</span>
+                    </div>
+                    <span class="txn-amount ${txn.senderId === 'admin' ? 'green' : txn.senderId === currentUser?.uid ? 'red' : 'green'}">
+                        ${txn.senderId === 'admin' || txn.receiverId === currentUser?.uid ? '+' : '-'}${formatCurrency(txn.amount)}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(transactions) {
+            const totalVolume = transactions.reduce((sum, txn) => 
+                txn.status === 'completed' ? sum + (txn.amount || 0) : sum, 0);
+            const completed = transactions.filter(t => t.status === 'completed');
+            const avg = completed.length > 0 ? totalVolume / completed.length : 0;
+            
+            document.getElementById('totalVolume').textContent = formatCurrency(totalVolume);
+            document.getElementById('totalCount').textContent = transactions.length;
+            document.getElementById('avgAmount').textContent = formatCurrency(avg);
+        }
+
+        function filterTransactions() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('statusFilter').value;
+            
+            let filtered = allTransactions;
+            
+            if (search) {
+                filtered = filtered.filter(txn => 
+                    (txn.transactionId || '').toLowerCase().includes(search) ||
+                    (txn.senderName || '').toLowerCase().includes(search) ||
+                    (txn.receiverName || '').toLowerCase().includes(search)
+                );
+            }
+            
+            if (status !== 'all') {
+                filtered = filtered.filter(txn => txn.status === status);
+            }
+            
+            renderTransactions(filtered);
+        }
+
+        function viewReceipt(txnId) {
+            const txn = allTransactions.find(t => t.id === txnId);
+            if (!txn) return;
+            
+            document.getElementById('receiptContent').innerHTML = `
+                <div class="receipt-view">
+                    <div class="receipt-amount">${formatCurrency(txn.amount)}</div>
+                    <div class="receipt-row">
+                        <span>Transaction ID</span>
+                        <span>${txn.transactionId}</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>Receipt ID</span>
+                        <span>${txn.receiptId || 'N/A'}</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>Date</span>
+                        <span>${formatDate(txn.createdAt)}</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>From</span>
+                        <span>${txn.senderName} (${txn.senderEmail})</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>To</span>
+                        <span>${txn.receiverName} (${txn.receiverEmail})</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span>Status</span>
+                        <span class="status-${txn.status}">${txn.status}</span>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('receiptModal').classList.remove('hidden');
+        }
+
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').classList.add('hidden');
+        }
+
+        function printReceipt() {
+            window.print();
+        }
+
+        function exportTransactions() {
+            if (allTransactions.length === 0) {
+                showToast('No transactions to export', 'error');
+                return;
+            }
+            
+            const csv = [
+                ['Date', 'Transaction ID', 'From', 'To', 'Amount', 'Status'].join(','),
+                ...allTransactions.map(t => [
+                    formatDate(t.createdAt),
+                    t.transactionId,
+                    t.senderName,
+                    t.receiverName,
+                    t.amount,
+                    t.status
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `transactions_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('Transactions exported!', 'success');
+        }
+    </script>
+
+    <style>
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-box {
+            flex: 1;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-box .stat-label {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-box .stat-value {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-box {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .transactions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .txn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .txn-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .txn-icon.red { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .txn-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+        .txn-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .txn-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .txn-users {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .txn-date {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .txn-amount {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .txn-amount.green { color: var(--success); }
+        .txn-amount.red { color: var(--danger); }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .receipt-view {
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .receipt-amount {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--success);
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+
+        .status-completed { color: var(--success); }
+        .status-pending { color: var(--warning); }
+    </style>
+</body>
+</html>

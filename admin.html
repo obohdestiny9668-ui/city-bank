@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - City Prime Bank</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Admin Header -->
+        <header class="header">
+            <a href="dashboard.html" class="back-btn" style="color: var(--text-primary);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="greeting" style="flex: 1; text-align: center;">
+                <div class="greeting-name">Admin Dashboard</div>
+            </div>
+            <button class="icon-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
+
+        <!-- Admin Badge -->
+        <div class="section">
+            <div class="admin-badge-card">
+                <i class="fas fa-user-shield"></i>
+                <span>Administrator Access</span>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="section">
+            <div class="admin-stats">
+                <div class="admin-stat">
+                    <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="totalUsers">0</span>
+                        <span class="stat-label">Total Users</span>
+                    </div>
+                </div>
+                <div class="admin-stat">
+                    <div class="stat-icon green"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="totalBalance">$0</span>
+                        <span class="stat-label">Total Balance</span>
+                    </div>
+                </div>
+                <div class="admin-stat">
+                    <div class="stat-icon orange"><i class="fas fa-exchange-alt"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="totalTransactions">0</span>
+                        <span class="stat-label">Transactions</span>
+                    </div>
+                </div>
+                <div class="admin-stat">
+                    <div class="stat-icon purple"><i class="fas fa-comments"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number" id="activeChats">0</span>
+                        <span class="stat-label">Active Chats</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section">
+            <h3 class="section-title">Quick Actions</h3>
+            <div class="admin-actions">
+                <a href="admin-users.html" class="admin-action">
+                    <div class="action-icon blue"><i class="fas fa-users-cog"></i></div>
+                    <span>Manage Users</span>
+                </a>
+                <a href="admin-transactions.html" class="admin-action">
+                    <div class="action-icon green"><i class="fas fa-list-alt"></i></div>
+                    <span>View Transactions</span>
+                </a>
+                <a href="admin-chat.html" class="admin-action">
+                    <div class="action-icon purple"><i class="fas fa-headset"></i></div>
+                    <span>Support Chat</span>
+                </a>
+                <button class="admin-action" onclick="showAddBalanceModal()">
+                    <div class="action-icon orange"><i class="fas fa-plus-circle"></i></div>
+                    <span>Quick Add Balance</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">Recent Users</h3>
+                <a href="admin-users.html" class="section-link">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="users-list" id="recentUsers">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading users...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">Recent Transactions</h3>
+                <a href="admin-transactions.html" class="section-link">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div class="transactions-list" id="recentTransactions">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading transactions...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Balance Modal -->
+    <div id="addBalanceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Quick Add Balance</h3>
+                <button class="close-btn" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addBalanceForm">
+                <div class="form-group">
+                    <label class="form-label">User Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="userEmail" class="form-input" placeholder="Enter user email" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="balanceAmount" class="form-input" placeholder="Enter amount" required min="1" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description (Optional)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-comment"></i>
+                        <input type="text" id="balanceDesc" class="form-input" placeholder="Description">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-plus-circle"></i> Add Balance
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Check admin access
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                checkAdminAccess(user.uid);
+            }
+        });
+
+        async function checkAdminAccess(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.role !== 'admin') {
+                        alert('Access denied. Admin privileges required.');
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+                    loadDashboard();
+                }
+            } catch (error) {
+                console.error('Error checking admin access:', error);
+                window.location.href = 'login.html';
+            }
+        }
+
+        async function loadDashboard() {
+            await Promise.all([
+                loadStats(),
+                loadRecentUsers(),
+                loadRecentTransactions()
+            ]);
+        }
+
+        async function loadStats() {
+            try {
+                // Count users
+                const usersSnapshot = await db.collection('users').get();
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+                
+                // Calculate total balance
+                let totalBalance = 0;
+                usersSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.role !== 'admin') {
+                        totalBalance += data.balance || 0;
+                    }
+                });
+                document.getElementById('totalBalance').textContent = formatCurrency(totalBalance);
+                
+                // Count transactions
+                const txnSnapshot = await db.collection('transactions').get();
+                document.getElementById('totalTransactions').textContent = txnSnapshot.size;
+                
+                // Count active chats
+                const chatSnapshot = await db.collection('chats').get();
+                document.getElementById('activeChats').textContent = chatSnapshot.size;
+                
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadRecentUsers() {
+            try {
+                const snapshot = await db.collection('users')
+                    .where('role', '==', 'user')
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+                
+                const container = document.getElementById('recentUsers');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <span>No users found</span>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const user = doc.data();
+                    return `
+                        <div class="user-item">
+                            <div class="user-avatar">${user.firstName[0]}${user.lastName[0]}</div>
+                            <div class="user-info">
+                                <span class="user-name">${user.firstName} ${user.lastName}</span>
+                                <span class="user-email">${user.email}</span>
+                            </div>
+                            <span class="user-balance">${formatCurrency(user.balance || 0)}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        async function loadRecentTransactions() {
+            try {
+                const snapshot = await db.collection('transactions')
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+                
+                const container = document.getElementById('recentTransactions');
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <span>No transactions found</span>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = snapshot.docs.map(doc => {
+                    const txn = doc.data();
+                    return `
+                        <div class="transaction-item">
+                            <div class="txn-icon ${txn.senderId === 'admin' ? 'green' : 'blue'}">
+                                <i class="fas fa-${txn.senderId === 'admin' ? 'arrow-down' : 'exchange-alt'}"></i>
+                            </div>
+                            <div class="txn-info">
+                                <span class="txn-title">${txn.description || 'Transfer'}</span>
+                                <span class="txn-date">${formatDate(txn.createdAt)}</span>
+                            </div>
+                            <span class="txn-amount ${txn.senderId === 'admin' ? 'green' : ''}">
+                                ${txn.senderId === 'admin' ? '+' : ''}${formatCurrency(txn.amount)}
+                            </span>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        function showAddBalanceModal() {
+            document.getElementById('addBalanceModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('addBalanceModal').classList.add('hidden');
+            document.getElementById('addBalanceForm').reset();
+        }
+
+        document.getElementById('addBalanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('userEmail').value;
+            const amount = parseFloat(document.getElementById('balanceAmount').value);
+            const desc = document.getElementById('balanceDesc').value;
+            
+            try {
+                // Find user
+                const userSnapshot = await db.collection('users')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+                
+                if (userSnapshot.empty) {
+                    showToast('User not found', 'error');
+                    return;
+                }
+                
+                const userDoc = userSnapshot.docs[0];
+                const userData = userDoc.data();
+                
+                // Update balance
+                await db.collection('users').doc(userDoc.id).update({
+                    balance: firebase.firestore.FieldValue.increment(amount)
+                });
+                
+                // Create transaction
+                await db.collection('transactions').add({
+                    transactionId: generateTransactionId(),
+                    receiptId: generateReceiptId(),
+                    senderId: 'admin',
+                    senderName: 'City Prime Admin',
+                    senderEmail: 'admin@cityprime.bank',
+                    receiverId: userDoc.id,
+                    receiverName: `${userData.firstName} ${userData.lastName}`,
+                    receiverEmail: userData.email,
+                    amount: amount,
+                    description: desc || 'Admin balance addition',
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Create notification
+                await db.collection('notifications').add({
+                    userId: userDoc.id,
+                    title: 'Balance Added!',
+                    message: `${formatCurrency(amount)} has been added to your account by admin.`,
+                    type: 'balance',
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                closeModal();
+                showToast(`Successfully added ${formatCurrency(amount)} to ${userData.firstName}'s account!`, 'success');
+                loadDashboard();
+                
+            } catch (error) {
+                console.error('Error adding balance:', error);
+                showToast('Failed to add balance', 'error');
+            }
+        });
+    </script>
+
+    <style>
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .admin-badge-card {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .admin-badge-card i {
+            font-size: 20px;
+        }
+
+        .admin-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .admin-stat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .stat-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .stat-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .stat-icon.purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .admin-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .admin-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .admin-action .action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .admin-action span {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .users-list, .transactions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-item, .transaction-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-info, .txn-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name, .txn-title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-email, .txn-date {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .user-balance, .txn-amount {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .txn-amount.green { color: var(--success); }
+
+        .txn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .txn-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .txn-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</body>
+</html>

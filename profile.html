@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - City Prime Bank</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="greeting">
+                <div>
+                    <div class="greeting-text">My Profile</div>
+                </div>
+            </div>
+            <button class="icon-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </header>
+
+        <!-- Profile Card -->
+        <div class="section">
+            <div class="profile-card">
+                <div class="profile-avatar">
+                    <span id="avatarInitials">--</span>
+                    <button class="edit-avatar" onclick="changeAvatar()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+                <h2 class="profile-name user-name-display">Loading...</h2>
+                <p class="profile-email" id="profileEmail">loading@example.com</p>
+                <span class="profile-badge">Personal Account</span>
+                
+                <div class="profile-stats">
+                    <div class="profile-stat">
+                        <span class="stat-value user-balance">$0.00</span>
+                        <span class="stat-label">Balance</span>
+                    </div>
+                    <div class="profile-stat">
+                        <span class="stat-value" id="memberSince">-</span>
+                        <span class="stat-label">Member Since</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Items -->
+        <div class="section">
+            <div class="menu-list">
+                <a href="edit-profile.html" class="menu-item">
+                    <div class="menu-icon blue"><i class="fas fa-user-edit"></i></div>
+                    <div class="menu-text">
+                        <span>Edit Profile</span>
+                        <small>Update your personal information</small>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                <a href="change-password.html" class="menu-item">
+                    <div class="menu-icon green"><i class="fas fa-lock"></i></div>
+                    <div class="menu-text">
+                        <span>Change Password</span>
+                        <small>Update your security credentials</small>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                <a href="change-pin.html" class="menu-item">
+                    <div class="menu-icon purple"><i class="fas fa-key"></i></div>
+                    <div class="menu-text">
+                        <span>Change Transfer PIN</span>
+                        <small>Update your 4-digit PIN</small>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                <a href="notifications.html" class="menu-item">
+                    <div class="menu-icon orange"><i class="fas fa-bell"></i></div>
+                    <div class="menu-text">
+                        <span>Notifications</span>
+                        <small>Manage your alerts</small>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                <a href="security.html" class="menu-item">
+                    <div class="menu-icon red"><i class="fas fa-shield-alt"></i></div>
+                    <div class="menu-text">
+                        <span>Security</span>
+                        <small>Two-factor authentication</small>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+                
+                <a href="help.html" class="menu-item">
+                    <div class="menu-icon blue"><i class="fas fa-question-circle"></i></div>
+                    <div class="menu-text">
+                        <span>Help & Support</span>
+                        <small>Get assistance</small>
+                    </div>
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Admin Link (hidden for regular users) -->
+        <div class="section hidden" id="adminSection">
+            <a href="admin.html" class="btn btn-primary btn-block">
+                <i class="fas fa-user-shield"></i> Admin Dashboard
+            </a>
+        </div>
+
+        <!-- Logout Button -->
+        <div class="section">
+            <button class="btn btn-danger btn-block" onclick="logout()" style="background: var(--danger);">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="activity.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Activity</span>
+            </a>
+            <a href="send.html" class="nav-item">
+                <i class="fas fa-paper-plane"></i>
+                <span>Transfer</span>
+            </a>
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="cards.html" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Cards</span>
+            </a>
+            <a href="profile.html" class="nav-item active">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Check auth
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loadProfile(user.uid);
+            }
+        });
+
+        async function loadProfile(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    
+                    // Update UI
+                    document.querySelectorAll('.user-name-display').forEach(el => {
+                        el.textContent = `${data.firstName} ${data.lastName}`;
+                    });
+                    
+                    document.getElementById('avatarInitials').textContent = 
+                        `${data.firstName[0]}${data.lastName[0]}`;
+                    
+                    document.getElementById('profileEmail').textContent = data.email;
+                    
+                    document.querySelectorAll('.user-balance').forEach(el => {
+                        el.textContent = formatCurrency(data.balance || 0);
+                    });
+                    
+                    document.getElementById('memberSince').textContent = 
+                        data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    
+                    // Show admin link if admin
+                    if (data.role === 'admin') {
+                        document.getElementById('adminSection').classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        function changeAvatar() {
+            showToast('Avatar change coming soon!', 'info');
+        }
+    </script>
+
+    <style>
+        .profile-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 36px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .edit-avatar {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 32px;
+            height: 32px;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .profile-name {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-email {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat .stat-value {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .profile-stat .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover {
+            border-color: var(--primary);
+        }
+
+        .menu-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .menu-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .menu-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .menu-icon.purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .menu-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .menu-icon.red { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+
+        .menu-text {
+            flex: 1;
+        }
+
+        .menu-text span {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .menu-text small {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .menu-item > i:last-child {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+    </style>
+</body>
+</html>

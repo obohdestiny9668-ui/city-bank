@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - City Prime Bank</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="dashboard.html" class="back-btn" style="color: var(--text-primary);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="greeting" style="flex: 1; text-align: center;">
+                <div class="greeting-name">Receipt</div>
+            </div>
+            <div style="width: 40px;"></div>
+        </header>
+
+        <!-- Receipt Card -->
+        <div class="section">
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2 class="receipt-title">Transfer Successful</h2>
+                    <p class="receipt-subtitle">Your transaction has been completed</p>
+                </div>
+
+                <div class="receipt-amount-section">
+                    <span class="amount-label">Amount Sent</span>
+                    <span class="amount-value" id="receiptAmount">$0.00</span>
+                </div>
+
+                <div class="receipt-details">
+                    <div class="receipt-row">
+                        <span class="row-label">Receipt ID</span>
+                        <span class="row-value" id="receiptId">-</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="row-label">Transaction ID</span>
+                        <span class="row-value" id="transactionId">-</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="row-label">Date & Time</span>
+                        <span class="row-value" id="receiptDate">-</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="row-label">From</span>
+                        <span class="row-value" id="senderName">-</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="row-label">To</span>
+                        <span class="row-value" id="receiverName">-</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="row-label">Description</span>
+                        <span class="row-value">Local Transfer</span>
+                    </div>
+                </div>
+
+                <div class="receipt-footer">
+                    <p>Thank you for banking with City Prime</p>
+                    <p class="receipt-note">Please keep this receipt for your records</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="section">
+            <button class="btn btn-primary btn-block" onclick="printReceipt()">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+            <button class="btn btn-secondary btn-block" onclick="shareReceipt()" style="margin-top: 12px;">
+                <i class="fas fa-share-alt"></i> Share Receipt
+            </button>
+            <a href="dashboard.html" class="btn btn-secondary btn-block" style="margin-top: 12px; text-decoration: none;">
+                <i class="fas fa-home"></i> Back to Home
+            </a>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="activity.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Activity</span>
+            </a>
+            <a href="send.html" class="nav-item">
+                <i class="fas fa-paper-plane"></i>
+                <span>Transfer</span>
+            </a>
+            <a href="dashboard.html" class="nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="cards.html" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Cards</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Check auth
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loadReceipt();
+            }
+        });
+
+        async function loadReceipt() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const txnId = urlParams.get('txn');
+            
+            if (!txnId) {
+                showToast('No transaction found', 'error');
+                return;
+            }
+            
+            try {
+                const doc = await db.collection('transactions').doc(txnId).get();
+                if (doc.exists) {
+                    const txn = doc.data();
+                    
+                    document.getElementById('receiptAmount').textContent = formatCurrency(txn.amount);
+                    document.getElementById('receiptId').textContent = txn.receiptId || 'N/A';
+                    document.getElementById('transactionId').textContent = txn.transactionId;
+                    document.getElementById('receiptDate').textContent = formatDate(txn.createdAt);
+                    document.getElementById('senderName').textContent = `${txn.senderName} (${txn.senderEmail})`;
+                    document.getElementById('receiverName').textContent = `${txn.receiverName} (${txn.receiverEmail})`;
+                }
+            } catch (error) {
+                console.error('Error loading receipt:', error);
+            }
+        }
+
+        function printReceipt() {
+            window.print();
+        }
+
+        function shareReceipt() {
+            showToast('Share feature coming soon!', 'info');
+        }
+    </script>
+
+    <style>
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .receipt-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .receipt-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 32px;
+            text-align: center;
+            color: white;
+        }
+
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+        }
+
+        .receipt-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .receipt-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .receipt-amount-section {
+            padding: 24px;
+            text-align: center;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .amount-label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .amount-value {
+            display: block;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .receipt-details {
+            padding: 24px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .receipt-row:last-child {
+            border-bottom: none;
+        }
+
+        .row-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .row-value {
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-word;
+        }
+
+        .receipt-footer {
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            text-align: center;
+        }
+
+        .receipt-footer p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .receipt-note {
+            margin-top: 4px;
+            font-size: 11px !important;
+        }
+
+        @media print {
+            .header, .bottom-nav, .btn {
+                display: none !important;
+            }
+            .receipt-card {
+                box-shadow: none;
+            }
+        }
+    </style>
+</body>
+</html>

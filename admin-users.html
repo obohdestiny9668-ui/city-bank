@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - City Prime Bank Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="admin.html" class="back-btn" style="color: var(--text-primary);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="greeting" style="flex: 1; text-align: center;">
+                <div class="greeting-name">Manage Users</div>
+            </div>
+            <div style="width: 40px;"></div>
+        </header>
+
+        <!-- Search -->
+        <div class="section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search users..." oninput="searchUsers()">
+            </div>
+        </div>
+
+        <!-- Users List -->
+        <div class="section">
+            <div class="section-header">
+                <h3 class="section-title">All Users (<span id="userCount">0</span>)</h3>
+            </div>
+            <div class="users-list" id="usersList">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>Loading users...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Actions Modal -->
+    <div id="userModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Manage User</h3>
+                <button class="close-btn" onclick="closeUserModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="userInfo"></div>
+            <div class="user-actions-grid">
+                <button class="action-btn" onclick="showAddBalance()">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Add Balance</span>
+                </button>
+                <button class="action-btn" onclick="showSubtractBalance()">
+                    <i class="fas fa-minus-circle"></i>
+                    <span>Subtract</span>
+                </button>
+                <button class="action-btn" onclick="showResetPin()">
+                    <i class="fas fa-key"></i>
+                    <span>Reset PIN</span>
+                </button>
+                <button class="action-btn" onclick="toggleUserStatus()">
+                    <i class="fas fa-ban"></i>
+                    <span id="suspendBtn">Suspend</span>
+                </button>
+                <button class="action-btn" onclick="viewUserTransactions()">
+                    <i class="fas fa-list"></i>
+                    <span>Transactions</span>
+                </button>
+                <button class="action-btn" onclick="chatWithUser()">
+                    <i class="fas fa-comment"></i>
+                    <span>Chat</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Balance Modal -->
+    <div id="addBalanceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Balance</h3>
+                <button class="close-btn" onclick="closeBalanceModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addBalanceForm">
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="addAmount" class="form-input" placeholder="Enter amount" required min="1" step="0.01">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-plus-circle"></i> Add Balance
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reset PIN Modal -->
+    <div id="resetPinModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Transfer PIN</h3>
+                <button class="close-btn" onclick="closePinModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="resetPinForm">
+                <div class="form-group">
+                    <label class="form-label">New PIN (4 digits)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="newPin" class="form-input" placeholder="Enter new PIN" required maxlength="4" pattern="\d{4}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-key"></i> Reset PIN
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        let allUsers = [];
+        let selectedUserId = null;
+        let selectedUserData = null;
+
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                checkAdmin(user.uid);
+            }
+        });
+
+        async function checkAdmin(uid) {
+            const doc = await db.collection('users').doc(uid).get();
+            if (!doc.exists || doc.data().role !== 'admin') {
+                alert('Access denied');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            loadUsers();
+        }
+
+        async function loadUsers() {
+            try {
+                const snapshot = await db.collection('users')
+                    .where('role', '==', 'user')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                allUsers = [];
+                snapshot.forEach(doc => {
+                    allUsers.push({ id: doc.id, ...doc.data() });
+                });
+                
+                renderUsers(allUsers);
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function renderUsers(users) {
+            document.getElementById('userCount').textContent = users.length;
+            const container = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <span>No users found</span>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = users.map(user => `
+                <div class="user-item" onclick="openUserModal('${user.id}')">
+                    <div class="user-avatar">${user.firstName[0]}${user.lastName[0]}</div>
+                    <div class="user-info">
+                        <span class="user-name">${user.firstName} ${user.lastName}</span>
+                        <span class="user-email">${user.email}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="user-balance">${formatCurrency(user.balance || 0)}</span>
+                        <span class="user-status ${user.status || 'active'}">${user.status || 'Active'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchUsers() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allUsers.filter(user => 
+                user.firstName.toLowerCase().includes(query) ||
+                user.lastName.toLowerCase().includes(query) ||
+                user.email.toLowerCase().includes(query)
+            );
+            renderUsers(filtered);
+        }
+
+        function openUserModal(userId) {
+            selectedUserId = userId;
+            selectedUserData = allUsers.find(u => u.id === userId);
+            
+            document.getElementById('userInfo').innerHTML = `
+                <div class="user-info-card">
+                    <div class="user-avatar-large">${selectedUserData.firstName[0]}${selectedUserData.lastName[0]}</div>
+                    <h4>${selectedUserData.firstName} ${selectedUserData.lastName}</h4>
+                    <p>${selectedUserData.email}</p>
+                    <div class="user-stats-row">
+                        <div class="user-stat">
+                            <span class="stat-value">${formatCurrency(selectedUserData.balance || 0)}</span>
+                            <span class="stat-label">Balance</span>
+                        </div>
+                        <div class="user-stat">
+                            <span class="stat-value">${selectedUserData.accountNumber || 'N/A'}</span>
+                            <span class="stat-label">Account</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('suspendBtn').textContent = 
+                selectedUserData.status === 'suspended' ? 'Activate' : 'Suspend';
+            
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+            selectedUserId = null;
+            selectedUserData = null;
+        }
+
+        function showAddBalance() {
+            closeUserModal();
+            document.getElementById('addBalanceModal').classList.remove('hidden');
+        }
+
+        function closeBalanceModal() {
+            document.getElementById('addBalanceModal').classList.add('hidden');
+            document.getElementById('addBalanceForm').reset();
+        }
+
+        document.getElementById('addBalanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('addAmount').value);
+            
+            try {
+                await db.collection('users').doc(selectedUserId).update({
+                    balance: firebase.firestore.FieldValue.increment(amount)
+                });
+                
+                await db.collection('transactions').add({
+                    transactionId: generateTransactionId(),
+                    senderId: 'admin',
+                    receiverId: selectedUserId,
+                    amount: amount,
+                    description: 'Admin balance addition',
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                closeBalanceModal();
+                showToast(`Added ${formatCurrency(amount)} successfully!`, 'success');
+                loadUsers();
+            } catch (error) {
+                showToast('Failed to add balance', 'error');
+            }
+        });
+
+        function showResetPin() {
+            closeUserModal();
+            document.getElementById('resetPinModal').classList.remove('hidden');
+        }
+
+        function closePinModal() {
+            document.getElementById('resetPinModal').classList.add('hidden');
+            document.getElementById('resetPinForm').reset();
+        }
+
+        document.getElementById('resetPinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPin = document.getElementById('newPin').value;
+            
+            try {
+                await db.collection('users').doc(selectedUserId).update({
+                    transferPin: newPin
+                });
+                
+                closePinModal();
+                showToast('PIN reset successfully!', 'success');
+            } catch (error) {
+                showToast('Failed to reset PIN', 'error');
+            }
+        });
+
+        async function toggleUserStatus() {
+            const newStatus = selectedUserData.status === 'suspended' ? 'active' : 'suspended';
+            
+            if (!confirm(`Are you sure you want to ${newStatus === 'suspended' ? 'suspend' : 'activate'} this user?`)) return;
+            
+            try {
+                await db.collection('users').doc(selectedUserId).update({
+                    status: newStatus
+                });
+                
+                closeUserModal();
+                showToast(`User ${newStatus === 'suspended' ? 'suspended' : 'activated'} successfully!`, 'success');
+                loadUsers();
+            } catch (error) {
+                showToast('Failed to update user status', 'error');
+            }
+        }
+
+        function viewUserTransactions() {
+            window.location.href = `admin-transactions.html?user=${selectedUserId}`;
+        }
+
+        function chatWithUser() {
+            window.location.href = `admin-chat.html?user=${selectedUserId}`;
+        }
+
+        function showSubtractBalance() {
+            showToast('Subtract balance coming soon!', 'info');
+        }
+    </script>
+
+    <style>
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .search-box i {
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-input:focus {
+            outline: none;
+        }
+
+        .users-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .user-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .user-balance {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-status {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .user-status.active {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .user-status.suspended {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .user-info-card {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .user-info-card h4 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .user-info-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .user-stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+        }
+
+        .user-stat {
+            text-align: center;
+        }
+
+        .user-stat .stat-value {
+            display: block;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .user-stat .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .user-actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 8px;
+            background: var(--bg-secondary);
+            border: none;
+            border-radius: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .action-btn i {
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .action-btn span {
+            font-size: 11px;
+        }
+    </style>
+</body>
+</html>

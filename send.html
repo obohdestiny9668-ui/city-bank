@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Money - City Prime Bank</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Header -->
+        <header class="header">
+            <a href="dashboard.html" class="back-btn" style="color: var(--text-primary);">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="greeting" style="flex: 1; text-align: center;">
+                <div class="greeting-name">Send Money</div>
+            </div>
+            <div style="width: 40px;"></div>
+        </header>
+
+        <!-- Transfer Type Tabs -->
+        <div class="transfer-tabs">
+            <button class="transfer-tab active" onclick="switchTab('local')">
+                <i class="fas fa-exchange-alt"></i>
+                Local Transfer
+            </button>
+            <button class="transfer-tab" onclick="switchTab('international')">
+                <i class="fas fa-globe"></i>
+                International Wire
+            </button>
+        </div>
+
+        <!-- Local Transfer Section -->
+        <div id="localSection" class="transfer-section">
+            <div class="section">
+                <div class="form-group">
+                    <label class="form-label">From</label>
+                    <div class="account-select">
+                        <div class="account-option active">
+                            <div class="account-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="account-info">
+                                <div class="account-name">Fiat Account</div>
+                                <div class="account-balance user-balance">$64,600.00</div>
+                            </div>
+                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="amount-input-wrapper">
+                        <span class="currency-symbol">$</span>
+                        <input type="number" id="amount" class="amount-input" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="amount-hint">Available: <span class="user-balance">$64,600.00</span></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Beneficiary Details</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="beneficiaryName" class="form-input" placeholder="Beneficiary Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="beneficiaryEmail" class="form-input" placeholder="Beneficiary Email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Bank Information</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-university"></i>
+                        <input type="text" id="bankName" class="form-input" placeholder="Bank Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" id="accountNumber" class="form-input" placeholder="Account Number">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Transfer PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="transferPin" class="form-input" placeholder="Enter 4-digit PIN" maxlength="4">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="sendMoney()" style="margin-top: 24px;">
+                    <i class="fas fa-paper-plane"></i> Send Money
+                </button>
+            </div>
+        </div>
+
+        <!-- International Transfer Section -->
+        <div id="internationalSection" class="transfer-section hidden">
+            <div class="section">
+                <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Select Payment Method</h3>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" onclick="selectMethod('wire')">
+                        <div class="payment-icon"><i class="fas fa-university"></i></div>
+                        <span>Wire Transfer</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('crypto')">
+                        <div class="payment-icon orange"><i class="fab fa-bitcoin"></i></div>
+                        <span>Cryptocurrency</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('paypal')">
+                        <div class="payment-icon blue"><i class="fab fa-paypal"></i></div>
+                        <span>PayPal</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('wise')">
+                        <div class="payment-icon green"><i class="fas fa-exchange-alt"></i></div>
+                        <span>Wise Transfer</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('cashapp')">
+                        <div class="payment-icon green"><i class="fas fa-dollar-sign"></i></div>
+                        <span>Cash App</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('more')">
+                        <div class="payment-icon"><i class="fas fa-ellipsis-h"></i></div>
+                        <span>More Options</span>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 14px; color: var(--text-muted); margin: 24px 0 16px;">Additional Methods</h3>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" onclick="selectMethod('skrill')">
+                        <div class="payment-icon purple"><i class="fas fa-wallet"></i></div>
+                        <span>Skrill</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('venmo')">
+                        <div class="payment-icon blue"><i class="fas fa-hand-holding-usd"></i></div>
+                        <span>Venmo</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('zelle')">
+                        <div class="payment-icon purple"><i class="fas fa-bolt"></i></div>
+                        <span>Zelle</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('revolut')">
+                        <div class="payment-icon pink"><i class="fas fa-credit-card"></i></div>
+                        <span>Revolut</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('alipay')">
+                        <div class="payment-icon blue"><i class="fas fa-qrcode"></i></div>
+                        <span>Alipay</span>
+                    </div>
+                    <div class="payment-method" onclick="selectMethod('wechat')">
+                        <div class="payment-icon green"><i class="fas fa-comment"></i></div>
+                        <span>WeChat Pay</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="activity.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Activity</span>
+            </a>
+            <a href="transfer.html" class="nav-item active">
+                <i class="fas fa-paper-plane"></i>
+                <span>Transfer</span>
+            </a>
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="cards.html" class="nav-item">
+                <i class="fas fa-credit-card"></i>
+                <span>Cards</span>
+            </a>
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        // Check auth
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                loadUserData(user.uid);
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    const userData = doc.data();
+                    document.querySelectorAll('.user-balance').forEach(el => {
+                        el.textContent = formatCurrency(userData.balance || 0);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.transfer-tab').forEach(t => t.classList.remove('active'));
+            event.target.closest('.transfer-tab').classList.add('active');
+            
+            document.getElementById('localSection').classList.toggle('hidden', tab !== 'local');
+            document.getElementById('internationalSection').classList.toggle('hidden', tab !== 'international');
+        }
+
+        function selectMethod(method) {
+            showToast(`${method} transfer coming soon!`, 'info');
+        }
+
+        async function sendMoney() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const beneficiaryEmail = document.getElementById('beneficiaryEmail').value;
+            const pin = document.getElementById('transferPin').value;
+            
+            if (!amount || amount <= 0) {
+                showToast('Please enter a valid amount', 'error');
+                return;
+            }
+            
+            if (!beneficiaryEmail) {
+                showToast('Please enter beneficiary email', 'error');
+                return;
+            }
+            
+            if (!pin || pin.length !== 4) {
+                showToast('Please enter your 4-digit PIN', 'error');
+                return;
+            }
+            
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            try {
+                // Get current user data
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.data();
+                
+                // Verify PIN
+                if (pin !== userData.transferPin) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    showToast('Incorrect transfer PIN', 'error');
+                    return;
+                }
+                
+                // Check balance
+                if (amount > (userData.balance || 0)) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    showToast('Insufficient balance', 'error');
+                    return;
+                }
+                
+                // Find recipient
+                const recipientSnapshot = await db.collection('users')
+                    .where('email', '==', beneficiaryEmail)
+                    .limit(1)
+                    .get();
+                
+                if (recipientSnapshot.empty) {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    showToast('Recipient not found', 'error');
+                    return;
+                }
+                
+                const recipientDoc = recipientSnapshot.docs[0];
+                const recipientData = recipientDoc.data();
+                
+                // Create transaction
+                const transactionId = generateTransactionId();
+                const receiptId = generateReceiptId();
+                
+                await db.collection('transactions').doc(transactionId).set({
+                    transactionId: transactionId,
+                    receiptId: receiptId,
+                    senderId: currentUser.uid,
+                    senderName: `${userData.firstName} ${userData.lastName}`,
+                    senderEmail: userData.email,
+                    receiverId: recipientDoc.id,
+                    receiverName: `${recipientData.firstName} ${recipientData.lastName}`,
+                    receiverEmail: recipientData.email,
+                    amount: amount,
+                    description: 'Local Transfer',
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update balances
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: firebase.firestore.FieldValue.increment(-amount)
+                });
+                
+                await db.collection('users').doc(recipientDoc.id).update({
+                    balance: firebase.firestore.FieldValue.increment(amount)
+                });
+                
+                // Create notification
+                await db.collection('notifications').add({
+                    userId: recipientDoc.id,
+                    title: 'Money Received!',
+                    message: `You received ${formatCurrency(amount)} from ${userData.firstName} ${userData.lastName}`,
+                    type: 'transfer',
+                    read: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                showToast('Transfer successful!', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'receipt.html?txn=' + transactionId;
+                }, 1500);
+                
+            } catch (error) {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                console.error('Error sending money:', error);
+                showToast('Transfer failed. Please try again.', 'error');
+            }
+        }
+    </script>
+
+    <style>
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .transfer-tabs {
+            display: flex;
+            padding: 0 16px;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .transfer-tab {
+            flex: 1;
+            padding: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .transfer-tab.active {
+            background: var(--gradient-blue);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .transfer-section.hidden {
+            display: none;
+        }
+
+        .account-select {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .account-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .account-option.active {
+            border-color: var(--primary);
+        }
+
+        .account-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--gradient-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .account-info {
+            flex: 1;
+        }
+
+        .account-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .account-balance {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .amount-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 16px;
+        }
+
+        .currency-symbol {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-right: 12px;
+        }
+
+        .amount-input {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 16px 0;
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .amount-input:focus {
+            outline: none;
+        }
+
+        .amount-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .payment-method {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 8px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary);
+        }
+
+        .payment-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(14, 165, 233, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .payment-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .payment-icon.blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .payment-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .payment-icon.purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+        .payment-icon.pink { background: rgba(236, 72, 153, 0.2); color: #ec4899; }
+
+        .payment-method span {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+    </style>
+</body>
+</html>

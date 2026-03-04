@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Prime Bank - Your Digital Banking Partner</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="landing.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- Landing Header -->
+        <header class="landing-header">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+                <span>City Prime Bank</span>
+            </div>
+            <button class="menu-btn" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=500&fit=crop" alt="Banking">
+                <div class="hero-overlay"></div>
+            </div>
+            <div class="hero-content">
+                <div class="hero-logo">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h1 class="hero-title">City Prime</h1>
+                <p class="hero-subtitle">Your Digital Banking Partner</p>
+                <p class="hero-desc">We do banking differently. We believe that people come first, and that everyone deserves a great experience every step of the way.</p>
+                <div class="hero-buttons">
+                    <a href="register.html" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus"></i> Open Account Today
+                    </a>
+                    <a href="login.html" class="btn btn-secondary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Login to Banking
+                    </a>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="stat-number">50K+</span>
+                        <span class="stat-label">Happy Customers</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-number">$2.5B+</span>
+                        <span class="stat-label">Assets Managed</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Rates Section -->
+        <section class="rates-section">
+            <div class="scroll-indicator">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <h2 class="section-title-large">City Prime Member Care</h2>
+            <p class="section-desc">Discover competitive rates designed to help your money grow faster</p>
+            
+            <div class="rates-list">
+                <div class="rate-item featured">
+                    <div class="rate-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="rate-value">3.75%</div>
+                    <div class="rate-label">APY*</div>
+                    <div class="rate-name">HIGH YIELD SAVINGS</div>
+                    <div class="rate-badge">FEATURED</div>
+                </div>
+                
+                <div class="rate-item">
+                    <div class="rate-icon green">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="rate-value">3.65%</div>
+                    <div class="rate-label">APY*</div>
+                    <div class="rate-name">18 MONTH CERTIFICATE</div>
+                    <div class="rate-type">SAVINGS</div>
+                </div>
+                
+                <div class="rate-item">
+                    <div class="rate-icon purple">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="rate-value">4.00%</div>
+                    <div class="rate-label">APR*</div>
+                    <div class="rate-name">CREDIT CARDS</div>
+                    <div class="rate-type">CREDIT</div>
+                </div>
+                
+                <div class="rate-item">
+                    <div class="rate-icon orange">
+                        <i class="fas fa-hand-holding-usd"></i>
+                    </div>
+                    <div class="rate-value">15.49%</div>
+                    <div class="rate-label">APR*</div>
+                    <div class="rate-name">LOANS</div>
+                    <div class="rate-type">MORTGAGE</div>
+                </div>
+            </div>
+            
+            <p class="rates-disclaimer">*Annual Percentage Yield. Rates subject to change. Terms and conditions apply.</p>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services-section">
+            <div class="section-badge">Our Services</div>
+            <h2 class="section-title-large">How Can We Help You Today?</h2>
+            <p class="section-desc">Comprehensive banking solutions tailored to your needs</p>
+            
+            <div class="services-list">
+                <div class="service-item">
+                    <div class="service-icon-large">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3>Deposit Accounts</h3>
+                    <p>Secure your money with our high-yield savings and checking accounts designed for growth.</p>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-icon-large blue">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <h3>Credit Cards</h3>
+                    <p>Find the perfect credit card for your lifestyle and spending habits with competitive rates.</p>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-icon-large green">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <h3>Loans</h3>
+                    <p>Get competitive rates on personal, auto, and home loans tailored to your financial goals.</p>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-icon-large purple">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h3>Business Banking</h3>
+                    <p>Comprehensive banking solutions designed to help your business thrive and grow.</p>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-icon-large orange">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>Wealth & Retire</h3>
+                    <p>Plan for your future with our expert investment and retirement planning services.</p>
+                </div>
+                
+                <div class="service-item">
+                    <div class="service-icon-large pink">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <h3>About City Prime</h3>
+                    <p>Learn more about our commitment to exceptional banking services and community support.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Promo Section -->
+        <section class="promo-section">
+            <div class="promo-badge">Get $200*</div>
+            <h2 class="promo-title">Start Building Your Financial Strength</h2>
+            <p class="promo-desc">For a limited time, get a $200 when you open any new account, and what helps you reach your financial goals. You can open a new account online or in person at any of our locations.</p>
+            <a href="register.html" class="btn btn-primary">
+                Open Account Now <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- About Section -->
+        <section class="about-section">
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=250&fit=crop" alt="Team">
+            </div>
+            <h2 class="section-title-large">Building Strength Together</h2>
+            <p class="section-desc">City Prime is a full-service credit union built on the foundation of providing our members with every step of their financial journey. We're committed to helping our members achieve their financial goals through personalized service and competitive rates.</p>
+            
+            <div class="about-features">
+                <div class="about-feature">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Competitive Rates</h4>
+                    <p>Better rates on savings, loans, and credit cards designed to maximize your financial growth.</p>
+                </div>
+                <div class="about-feature">
+                    <i class="fas fa-users"></i>
+                    <h4>Member-Focused</h4>
+                    <p>We're owned by our members, not shareholders. Your success is our priority.</p>
+                </div>
+                <div class="about-feature">
+                    <i class="fas fa-heart"></i>
+                    <h4>Community Committed</h4>
+                    <p>Supporting local communities and causes that matter to our members.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="testimonials-section">
+            <h2 class="section-title-large">Hear From Our Customers</h2>
+            <div class="testimonials-list">
+                <div class="testimonial-item">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"I am impressed with the customer service and speed of payout."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SM</div>
+                        <div class="author-info">
+                            <span class="author-name">Sarah Morris</span>
+                            <span class="author-title">Verified Customer</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-item">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"Excellent service and competitive rates. Highly recommended!"</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">JD</div>
+                        <div class="author-info">
+                            <span class="author-name">John Davis</span>
+                            <span class="author-title">Business Owner</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-item">
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"The mobile app is fantastic and customer support is top-notch."</p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">EJ</div>
+                        <div class="author-info">
+                            <span class="author-name">Emily Johnson</span>
+                            <span class="author-title">Personal Banking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section">
+            <div class="contact-item">
+                <i class="fas fa-clock"></i>
+                <h4>Banking Hours</h4>
+                <p>Mon-Fri: 9AM-5PM<br>Sat: 9AM-1PM<br>Sun: Closed</p>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <h4>Phone Banking</h4>
+                <p>Available 24/7<br>Call: 1-800-BANKING<br>International: +1-555-0123</p>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <h4>Email Support</h4>
+                <p>Response within 24hrs<br>support@cityprime.bank</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-logo">
+                <i class="fas fa-university"></i>
+                <span>City Prime Bank</span>
+            </div>
+            <p class="footer-desc">Building financial strength together with personalized banking solutions for every member. Your trusted partner in financial growth.</p>
+            
+            <div class="social-links">
+                <a href="#"><i class="fab fa-facebook"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+            </div>
+            
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h5>Quick Links</h5>
+                    <a href="#">About Us</a>
+                    <a href="#">Services</a>
+                    <a href="#">Grants & Aid</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div class="footer-column">
+                    <h5>Services</h5>
+                    <a href="#">Personal Banking</a>
+                    <a href="#">Business Banking</a>
+                    <a href="#">Loans & Credit</a>
+                    <a href="#">Cards</a>
+                </div>
+                <div class="footer-column">
+                    <h5>Member Services</h5>
+                    <a href="#">Online Banking</a>
+                    <a href="#">Mobile App</a>
+                    <a href="#">ATM Locations</a>
+                    <a href="#">Security Center</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 City Prime. All rights reserved.</p>
+                <div class="footer-badges">
+                    <span><i class="fas fa-shield-alt"></i> FDIC Insured</span>
+                    <span><i class="fas fa-lock"></i> 256-bit SSL</span>
+                </div>
+                <div class="footer-legal">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Accessibility</a>
+                    <a href="#">Sitemap</a>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Bottom Auth Nav -->
+        <div class="auth-nav">
+            <a href="login.html" class="auth-nav-item">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+            <a href="register.html" class="auth-nav-item active">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
+        </div>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script>
+        function toggleMenu() {
+            showToast('Menu coming soon!', 'info');
+        }
+    </script>
+</body>
+</html>
