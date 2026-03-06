@@ -108,6 +108,30 @@
         </div>
     </div>
 
+    <!-- Subtract Balance Modal -->
+    <div id="subtractBalanceModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Subtract Balance</h3>
+                <button class="close-btn" onclick="closeSubtractModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="subtractBalanceForm">
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-dollar-sign"></i>
+                        <input type="number" id="subtractAmount" class="form-input" placeholder="Enter amount" required min="1" step="0.01">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-danger btn-block">
+                    <i class="fas fa-minus-circle"></i> Subtract Balance
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Reset PIN Modal -->
     <div id="resetPinModal" class="modal hidden">
         <div class="modal-content">
@@ -158,19 +182,29 @@
 
         async function loadUsers() {
             try {
+                // Get all users without role filter to show everyone
                 const snapshot = await db.collection('users')
-                    .where('role', '==', 'user')
                     .orderBy('createdAt', 'desc')
                     .get();
                 
                 allUsers = [];
                 snapshot.forEach(doc => {
-                    allUsers.push({ id: doc.id, ...doc.data() });
+                    const userData = doc.data();
+                    // Exclude current admin from the list
+                    if (userData.role !== 'admin') {
+                        allUsers.push({ id: doc.id, ...userData });
+                    }
                 });
                 
                 renderUsers(allUsers);
             } catch (error) {
                 console.error('Error loading users:', error);
+                document.getElementById('usersList').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Error loading users</span>
+                    </div>
+                `;
             }
         }
 
@@ -190,10 +224,10 @@
             
             container.innerHTML = users.map(user => `
                 <div class="user-item" onclick="openUserModal('${user.id}')">
-                    <div class="user-avatar">${user.firstName[0]}${user.lastName[0]}</div>
+                    <div class="user-avatar">${(user.firstName || 'U')[0]}${(user.lastName || '')[0]}</div>
                     <div class="user-info">
-                        <span class="user-name">${user.firstName} ${user.lastName}</span>
-                        <span class="user-email">${user.email}</span>
+                        <span class="user-name">${user.firstName || 'Unknown'} ${user.lastName || ''}</span>
+                        <span class="user-email">${user.email || 'No email'}</span>
                     </div>
                     <div style="text-align: right;">
                         <span class="user-balance">${formatCurrency(user.balance || 0)}</span>
@@ -206,9 +240,9 @@
         function searchUsers() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const filtered = allUsers.filter(user => 
-                user.firstName.toLowerCase().includes(query) ||
-                user.lastName.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query)
+                (user.firstName || '').toLowerCase().includes(query) ||
+                (user.lastName || '').toLowerCase().includes(query) ||
+                (user.email || '').toLowerCase().includes(query)
             );
             renderUsers(filtered);
         }
@@ -217,11 +251,13 @@
             selectedUserId = userId;
             selectedUserData = allUsers.find(u => u.id === userId);
             
+            if (!selectedUserData) return;
+            
             document.getElementById('userInfo').innerHTML = `
                 <div class="user-info-card">
-                    <div class="user-avatar-large">${selectedUserData.firstName[0]}${selectedUserData.lastName[0]}</div>
-                    <h4>${selectedUserData.firstName} ${selectedUserData.lastName}</h4>
-                    <p>${selectedUserData.email}</p>
+                    <div class="user-avatar-large">${(selectedUserData.firstName || 'U')[0]}${(selectedUserData.lastName || '')[0]}</div>
+                    <h4>${selectedUserData.firstName || 'Unknown'} ${selectedUserData.lastName || ''}</h4>
+                    <p>${selectedUserData.email || 'No email'}</p>
                     <div class="user-stats-row">
                         <div class="user-stat">
                             <span class="stat-value">${formatCurrency(selectedUserData.balance || 0)}</span>
@@ -268,10 +304,16 @@
                 
                 await db.collection('transactions').add({
                     transactionId: generateTransactionId(),
+                    receiptId: generateReceiptId(),
                     senderId: 'admin',
+                    senderName: 'Admin',
+                    senderEmail: 'admin@cityprime.bank',
                     receiverId: selectedUserId,
+                    receiverName: `${selectedUserData.firstName} ${selectedUserData.lastName}`,
+                    receiverEmail: selectedUserData.email,
                     amount: amount,
-                    description: 'Admin balance addition',
+                    description: 'Admin Credit',
+                    transferType: 'credit',
                     status: 'completed',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -280,7 +322,52 @@
                 showToast(`Added ${formatCurrency(amount)} successfully!`, 'success');
                 loadUsers();
             } catch (error) {
+                console.error('Error adding balance:', error);
                 showToast('Failed to add balance', 'error');
+            }
+        });
+
+        function showSubtractBalance() {
+            closeUserModal();
+            document.getElementById('subtractBalanceModal').classList.remove('hidden');
+        }
+
+        function closeSubtractModal() {
+            document.getElementById('subtractBalanceModal').classList.add('hidden');
+            document.getElementById('subtractBalanceForm').reset();
+        }
+
+        document.getElementById('subtractBalanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('subtractAmount').value);
+            
+            try {
+                await db.collection('users').doc(selectedUserId).update({
+                    balance: firebase.firestore.FieldValue.increment(-amount)
+                });
+                
+                await db.collection('transactions').add({
+                    transactionId: generateTransactionId(),
+                    receiptId: generateReceiptId(),
+                    senderId: selectedUserId,
+                    senderName: `${selectedUserData.firstName} ${selectedUserData.lastName}`,
+                    senderEmail: selectedUserData.email,
+                    receiverId: 'admin',
+                    receiverName: 'Admin',
+                    receiverEmail: 'admin@cityprime.bank',
+                    amount: amount,
+                    description: 'Admin Debit',
+                    transferType: 'debit',
+                    status: 'completed',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                closeSubtractModal();
+                showToast(`Subtracted ${formatCurrency(amount)} successfully!`, 'success');
+                loadUsers();
+            } catch (error) {
+                console.error('Error subtracting balance:', error);
+                showToast('Failed to subtract balance', 'error');
             }
         });
 
@@ -306,6 +393,7 @@
                 closePinModal();
                 showToast('PIN reset successfully!', 'success');
             } catch (error) {
+                console.error('Error resetting PIN:', error);
                 showToast('Failed to reset PIN', 'error');
             }
         });
@@ -324,6 +412,7 @@
                 showToast(`User ${newStatus === 'suspended' ? 'suspended' : 'activated'} successfully!`, 'success');
                 loadUsers();
             } catch (error) {
+                console.error('Error updating user status:', error);
                 showToast('Failed to update user status', 'error');
             }
         }
@@ -334,10 +423,6 @@
 
         function chatWithUser() {
             window.location.href = `admin-chat.html?user=${selectedUserId}`;
-        }
-
-        function showSubtractBalance() {
-            showToast('Subtract balance coming soon!', 'info');
         }
     </script>
 
@@ -573,6 +658,11 @@
 
         .action-btn span {
             font-size: 11px;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
         }
     </style>
 </body>

@@ -31,10 +31,6 @@
         <button class="icon-btn" onclick="toggleTheme()">
             <i class="fas fa-sun"></i>
         </button>
-        <button class="icon-btn notification" onclick="window.location.href='notifications.html'">
-            <i class="fas fa-bell"></i>
-            <span class="badge" id="notificationBadge">0</span>
-        </button>
     </header>
 
     <!-- Main Content -->
@@ -42,8 +38,8 @@
         <!-- Filter Tabs -->
         <div class="filter-tabs">
             <button class="tab active" onclick="filterActivity('all')">All</button>
-            <button class="tab" onclick="filterActivity('income')">Income</button>
-            <button class="tab" onclick="filterActivity('expense')">Expense</button>
+            <button class="tab" onclick="filterActivity('credit')">Credit</button>
+            <button class="tab" onclick="filterActivity('debit')">Debit</button>
         </div>
 
         <!-- Search -->
@@ -102,15 +98,15 @@
         <div class="date-section" id="summarySection">
             <h3>Summary</h3>
             <div class="summary-cards">
-                <div class="summary-card income">
+                <div class="summary-card credit">
                     <i class="fas fa-arrow-down"></i>
-                    <span>Total Income</span>
-                    <strong id="totalIncome">$0.00</strong>
+                    <span>Total Credit</span>
+                    <strong id="totalCredit">$0.00</strong>
                 </div>
-                <div class="summary-card expense">
+                <div class="summary-card debit">
                     <i class="fas fa-arrow-up"></i>
-                    <span>Total Expense</span>
-                    <strong id="totalExpense">$0.00</strong>
+                    <span>Total Debit</span>
+                    <strong id="totalDebit">$0.00</strong>
                 </div>
             </div>
         </div>

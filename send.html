@@ -120,7 +120,7 @@
                     </div>
                     <div class="payment-method" onclick="showCryptoForm()">
                         <div class="payment-icon orange"><i class="fab fa-bitcoin"></i></div>
-                        <span>Cryptocurrency</span>
+                        <span>Bitcoin (BTC)</span>
                     </div>
                     <div class="payment-method" onclick="showPayPalForm()">
                         <div class="payment-icon blue"><i class="fab fa-paypal"></i></div>
@@ -251,13 +251,13 @@
                 </button>
             </div>
 
-            <!-- Cryptocurrency Form -->
+            <!-- Bitcoin Form -->
             <div id="cryptoForm" class="section hidden">
                 <div class="form-header">
                     <button class="back-btn-form" onclick="backToPaymentMethods()">
                         <i class="fas fa-arrow-left"></i>
                     </button>
-                    <h3 style="font-size: 16px; color: var(--text-primary); flex: 1; text-align: center;">Cryptocurrency</h3>
+                    <h3 style="font-size: 16px; color: var(--text-primary); flex: 1; text-align: center;">Bitcoin (BTC)</h3>
                     <div style="width: 40px;"></div>
                 </div>
 
@@ -287,25 +287,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Select Cryptocurrency</label>
-                    <div class="input-wrapper">
-                        <i class="fab fa-bitcoin"></i>
-                        <select id="cryptoType" class="form-input">
-                            <option value="BTC">Bitcoin (BTC)</option>
-                            <option value="ETH">Ethereum (ETH)</option>
-                            <option value="USDT">Tether (USDT)</option>
-                            <option value="USDC">USD Coin (USDC)</option>
-                            <option value="BNB">Binance Coin (BNB)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Wallet Address</label>
+                    <label class="form-label">Bitcoin Wallet Address</label>
                     <div class="input-wrapper">
                         <i class="fas fa-wallet"></i>
-                        <input type="text" id="cryptoWalletAddress" class="form-input" placeholder="Enter wallet address">
+                        <input type="text" id="cryptoWalletAddress" class="form-input" placeholder="Enter BTC wallet address" value="1pDjEtZ9hPZ2TrkfSZUgEFwcyVV8S7uSM">
                     </div>
+                    <small style="color: var(--text-muted); margin-top: 4px; display: block;">
+                        <i class="fas fa-info-circle"></i> Default address provided. You can change it.
+                    </small>
                 </div>
 
                 <div class="form-group">
@@ -313,10 +302,8 @@
                     <div class="input-wrapper">
                         <i class="fas fa-network-wired"></i>
                         <select id="cryptoNetwork" class="form-input">
-                            <option value="ERC20">ERC20 (Ethereum)</option>
-                            <option value="BEP20">BEP20 (BSC)</option>
-                            <option value="TRC20">TRC20 (Tron)</option>
                             <option value="BTC">Bitcoin Network</option>
+                            <option value="BEP20">BEP20 (BSC)</option>
                         </select>
                     </div>
                 </div>
@@ -330,7 +317,7 @@
                 </div>
 
                 <button class="btn btn-primary btn-block" onclick="sendCryptoTransfer()" style="margin-top: 24px;">
-                    <i class="fab fa-bitcoin"></i> Send Crypto
+                    <i class="fab fa-bitcoin"></i> Send Bitcoin
                 </button>
             </div>
 
@@ -1164,10 +1151,9 @@
             }, `Wire Transfer to ${beneficiaryName}`);
         }
 
-        // Cryptocurrency Transfer
+        // Bitcoin Transfer
         async function sendCryptoTransfer() {
             const amount = parseFloat(document.getElementById('cryptoAmount').value);
-            const cryptoType = document.getElementById('cryptoType').value;
             const walletAddress = document.getElementById('cryptoWalletAddress').value.trim();
             const network = document.getElementById('cryptoNetwork').value;
             const pin = document.getElementById('cryptoTransferPin').value;
@@ -1177,10 +1163,10 @@
             if (!pin || pin.length !== 4) return showToast('Please enter your 4-digit PIN', 'error');
             
             await processTransfer(amount, pin, 'crypto', {
-                cryptoType,
+                cryptoType: 'BTC',
                 walletAddress,
                 network
-            }, `${cryptoType} Transfer`);
+            }, `Bitcoin Transfer`);
         }
 
         // PayPal Transfer
@@ -1344,7 +1330,7 @@
             }, `WeChat Pay to ${recipientName}`);
         }
 
-        // Local Transfer (existing functionality)
+        // Local Transfer
         async function sendMoney() {
             const amount = parseFloat(document.getElementById('amount').value);
             const beneficiaryEmail = document.getElementById('beneficiaryEmail').value;

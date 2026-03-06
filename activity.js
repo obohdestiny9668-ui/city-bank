@@ -20,7 +20,6 @@ auth.onAuthStateChanged((user) => {
     } else {
         currentUser = user;
         loadTransactions(user.uid);
-        loadNotificationCount(user.uid);
     }
 });
 
@@ -49,25 +48,25 @@ async function loadTransactions(uid) {
 
         allTransactions = [];
 
-        // Process sent transactions (expenses)
+        // Process sent transactions (debit)
         sentSnapshot.forEach(doc => {
             const data = doc.data();
             allTransactions.push({
                 id: doc.id,
                 ...data,
-                type: 'expense',
+                type: 'debit',
                 displayName: data.receiverName || 'Unknown',
                 displayDescription: data.description || 'Transfer Sent'
             });
         });
 
-        // Process received transactions (income)
+        // Process received transactions (credit)
         receivedSnapshot.forEach(doc => {
             const data = doc.data();
             allTransactions.push({
                 id: doc.id,
                 ...data,
-                type: 'income',
+                type: 'credit',
                 displayName: data.senderName || 'Unknown',
                 displayDescription: data.description || 'Transfer Received'
             });
@@ -181,8 +180,9 @@ function createTransactionHTML(transaction) {
     });
 
     const icon = getTransactionIcon(transaction.transferType);
-    const amountClass = transaction.type === 'income' ? 'income' : 'expense';
-    const amountPrefix = transaction.type === 'income' ? '+' : '-';
+    const amountClass = transaction.type === 'credit' ? 'credit' : 'debit';
+    const amountPrefix = transaction.type === 'credit' ? '+' : '-';
+    const title = transaction.type === 'credit' ? 'Credit' : 'Debit';
 
     return `
         <div class="transaction-item" data-type="${transaction.type}" data-id="${transaction.id}">
@@ -190,7 +190,7 @@ function createTransactionHTML(transaction) {
                 <i class="${icon}"></i>
             </div>
             <div class="transaction-info">
-                <h4>${transaction.displayName}</h4>
+                <h4>${title}</h4>
                 <p>${transaction.displayDescription}</p>
                 <span class="time">${formattedDate}, ${formattedTime}</span>
             </div>
@@ -220,19 +220,19 @@ function getTransactionIcon(type) {
 
 // Update summary cards
 function updateSummary(transactions) {
-    let totalIncome = 0;
-    let totalExpense = 0;
+    let totalCredit = 0;
+    let totalDebit = 0;
 
     transactions.forEach(txn => {
-        if (txn.type === 'income') {
-            totalIncome += parseFloat(txn.amount) || 0;
+        if (txn.type === 'credit') {
+            totalCredit += parseFloat(txn.amount) || 0;
         } else {
-            totalExpense += parseFloat(txn.amount) || 0;
+            totalDebit += parseFloat(txn.amount) || 0;
         }
     });
 
-    document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
-    document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+    document.getElementById('totalCredit').textContent = formatCurrency(totalCredit);
+    document.getElementById('totalDebit').textContent = formatCurrency(totalDebit);
 }
 
 // Filter activity
@@ -270,24 +270,6 @@ function searchTransactions() {
     });
 
     renderTransactions(filtered);
-}
-
-// Load notification count
-async function loadNotificationCount(uid) {
-    try {
-        const snapshot = await db.collection('notifications')
-            .where('userId', '==', uid)
-            .where('read', '==', false)
-            .get();
-        
-        const badge = document.getElementById('notificationBadge');
-        if (badge) {
-            badge.textContent = snapshot.size;
-            badge.style.display = snapshot.size > 0 ? 'flex' : 'none';
-        }
-    } catch (error) {
-        console.error('Error loading notifications:', error);
-    }
 }
 
 // Theme toggle
@@ -343,6 +325,26 @@ style.textContent = `
     .transaction-item:hover {
         background: rgba(30, 41, 59, 0.8);
         transform: translateX(4px);
+    }
+    .transaction-icon.credit {
+        background: rgba(34, 197, 94, 0.1);
+        color: var(--success);
+    }
+    .transaction-icon.debit {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+    .transaction-amount.credit {
+        color: var(--success);
+    }
+    .transaction-amount.debit {
+        color: var(--danger);
+    }
+    .summary-card.credit i {
+        color: var(--success);
+    }
+    .summary-card.debit i {
+        color: var(--danger);
     }
 `;
 document.head.appendChild(style);
