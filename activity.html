@@ -1,0 +1,136 @@
+<!-- activity.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity - City Prime Bank</title>
+    <link rel="stylesheet" href="activity.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="time" id="clock">7:01</div>
+        <div class="status-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <button class="back-btn" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1>Activity</h1>
+        <button class="icon-btn" onclick="toggleTheme()">
+            <i class="fas fa-sun"></i>
+        </button>
+        <button class="icon-btn notification">
+            <i class="fas fa-bell"></i>
+            <span class="badge">4</span>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="tab active" onclick="filterActivity('all')">All</button>
+            <button class="tab" onclick="filterActivity('income')">Income</button>
+            <button class="tab" onclick="filterActivity('expense')">Expense</button>
+        </div>
+
+        <!-- Search -->
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search transactions..." id="searchInput" onkeyup="searchTransactions()">
+        </div>
+
+        <!-- Date Section -->
+        <div class="date-section">
+            <h3>Today</h3>
+            <div class="transaction-list" id="transactionList">
+                <div class="transaction-item" data-type="income">
+                    <div class="transaction-icon income">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <h4>Credit</h4>
+                        <p>Deposit from Bank Transfer</p>
+                        <span class="time">02 Nov 2025, 17:00</span>
+                    </div>
+                    <div class="transaction-amount income">+$0.41</div>
+                </div>
+
+                <div class="transaction-item" data-type="income">
+                    <div class="transaction-icon income">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="transaction-info">
+                        <h4>Credit</h4>
+                        <p>Initial Deposit</p>
+                        <span class="time">21 Nov 2025, 05:59</span>
+                    </div>
+                    <div class="transaction-amount income">+$65,000.00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yesterday -->
+        <div class="date-section">
+            <h3>Yesterday</h3>
+            <div class="empty-day">
+                <p>No transactions</p>
+            </div>
+        </div>
+
+        <!-- This Month -->
+        <div class="date-section">
+            <h3>This Month</h3>
+            <div class="summary-cards">
+                <div class="summary-card income">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>Total Income</span>
+                    <strong>$65,000.41</strong>
+                </div>
+                <div class="summary-card expense">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>Total Expense</span>
+                    <strong>$0.00</strong>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="activity.html" class="nav-item active">
+            <div class="nav-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <span>Activity</span>
+        </a>
+        <a href="transfer.html" class="nav-item">
+            <i class="fas fa-paper-plane"></i>
+            <span>Transfer</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="cards.html" class="nav-item">
+            <i class="fas fa-credit-card"></i>
+            <span>Cards</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="activity.js"></script>
+</body>
+</html>
