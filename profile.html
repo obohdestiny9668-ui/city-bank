@@ -53,7 +53,7 @@
         <!-- Menu Items -->
         <div class="section">
             <div class="menu-list">
-                <a href="edit-profile.html" class="menu-item">
+                <a href="#" class="menu-item" onclick="openEditProfileModal(); return false;">
                     <div class="menu-icon blue"><i class="fas fa-user-edit"></i></div>
                     <div class="menu-text">
                         <span>Edit Profile</span>
@@ -62,7 +62,7 @@
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 
-                <a href="change-password.html" class="menu-item">
+                <a href="#" class="menu-item" onclick="openChangePasswordModal(); return false;">
                     <div class="menu-icon green"><i class="fas fa-lock"></i></div>
                     <div class="menu-text">
                         <span>Change Password</span>
@@ -71,7 +71,7 @@
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 
-                <a href="change-pin.html" class="menu-item">
+                <a href="#" class="menu-item" onclick="openChangePinModal(); return false;">
                     <div class="menu-icon purple"><i class="fas fa-key"></i></div>
                     <div class="menu-text">
                         <span>Change Transfer PIN</span>
@@ -80,7 +80,7 @@
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 
-                <a href="notifications.html" class="menu-item">
+                <a href="#" class="menu-item" onclick="openNotificationsModal(); return false;">
                     <div class="menu-icon orange"><i class="fas fa-bell"></i></div>
                     <div class="menu-text">
                         <span>Notifications</span>
@@ -89,7 +89,7 @@
                     <i class="fas fa-chevron-right"></i>
                 </a>
                 
-                <a href="security.html" class="menu-item">
+                <a href="#" class="menu-item" onclick="openSecurityModal(); return false;">
                     <div class="menu-icon red"><i class="fas fa-shield-alt"></i></div>
                     <div class="menu-text">
                         <span>Security</span>
@@ -148,8 +148,264 @@
         </nav>
     </div>
 
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <button class="modal-close" onclick="closeModal('editProfileModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">First Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="editFirstName" class="form-input" placeholder="First Name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="editLastName" class="form-input" placeholder="Last Name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="editEmail" class="form-input" placeholder="Email" readonly>
+                    </div>
+                    <small style="color: var(--text-muted);">Email cannot be changed</small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="editPhone" class="form-input" placeholder="+1 234 567 8900">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" id="editAddress" class="form-input" placeholder="Your Address">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('editProfileModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="modal-close" onclick="closeModal('changePasswordModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Current Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="currentPassword" class="form-input" placeholder="Enter current password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="newPassword" class="form-input" placeholder="Enter new password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm New Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" class="form-input" placeholder="Confirm new password">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('changePasswordModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="savePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change PIN Modal -->
+    <div id="changePinModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Transfer PIN</h3>
+                <button class="modal-close" onclick="closeModal('changePinModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Current PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="currentPin" class="form-input" placeholder="Enter current PIN" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">New PIN (4 digits)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="newPin" class="form-input" placeholder="Enter new PIN" maxlength="4">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm New PIN</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="confirmPin" class="form-input" placeholder="Confirm new PIN" maxlength="4">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('changePinModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="savePin()">Update PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div id="notificationsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Notifications</h3>
+                <button class="modal-close" onclick="closeModal('notificationsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="notification-settings">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Transaction Alerts</span>
+                            <small class="setting-desc">Get notified for all transactions</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="transactionAlerts" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Login Alerts</span>
+                            <small class="setting-desc">Get notified when someone logs in</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="loginAlerts" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Promotional Emails</span>
+                            <small class="setting-desc">Receive offers and updates</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="promoEmails">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Push Notifications</span>
+                            <small class="setting-desc">Enable push notifications</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="pushNotifications" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('notificationsModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNotifications()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Modal -->
+    <div id="securityModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Security Settings</h3>
+                <button class="modal-close" onclick="closeModal('securityModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="security-settings">
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Two-Factor Authentication</span>
+                            <small class="setting-desc">Add extra security to your account</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="twoFactorAuth">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Biometric Login</span>
+                            <small class="setting-desc">Use fingerprint or face recognition</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="biometricLogin">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <span class="setting-title">Session Timeout</span>
+                            <small class="setting-desc">Auto logout after 15 minutes</small>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="sessionTimeout" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="security-info">
+                    <h4>Recent Activity</h4>
+                    <div class="activity-list" id="recentActivity">
+                        <p style="color: var(--text-muted); text-align: center; padding: 20px;">Loading...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('securityModal')">Close</button>
+                <button class="btn btn-primary" onclick="saveSecuritySettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Processing...</p>
+    </div>
+
     <script src="firebase-config.js"></script>
     <script>
+        let currentUserData = null;
+
         // Check auth
         auth.onAuthStateChanged((user) => {
             if (!user) {
@@ -163,37 +419,352 @@
             try {
                 const doc = await db.collection('users').doc(uid).get();
                 if (doc.exists) {
-                    const data = doc.data();
+                    currentUserData = doc.data();
                     
                     // Update UI
                     document.querySelectorAll('.user-name-display').forEach(el => {
-                        el.textContent = `${data.firstName} ${data.lastName}`;
+                        el.textContent = `${currentUserData.firstName} ${currentUserData.lastName}`;
                     });
                     
                     document.getElementById('avatarInitials').textContent = 
-                        `${data.firstName[0]}${data.lastName[0]}`;
+                        `${currentUserData.firstName[0]}${currentUserData.lastName[0]}`;
                     
-                    document.getElementById('profileEmail').textContent = data.email;
+                    document.getElementById('profileEmail').textContent = currentUserData.email;
                     
                     document.querySelectorAll('.user-balance').forEach(el => {
-                        el.textContent = formatCurrency(data.balance || 0);
+                        el.textContent = formatCurrency(currentUserData.balance || 0);
                     });
                     
                     document.getElementById('memberSince').textContent = 
-                        data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A';
+                        currentUserData.createdAt ? currentUserData.createdAt.toDate().toLocaleDateString() : 'N/A';
                     
                     // Show admin link if admin
-                    if (data.role === 'admin') {
+                    if (currentUserData.role === 'admin') {
                         document.getElementById('adminSection').classList.remove('hidden');
                     }
+
+                    // Load notification settings
+                    loadNotificationSettings();
+                    loadSecuritySettings();
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
             }
         }
 
+        // Modal Functions
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Edit Profile Modal
+        function openEditProfileModal() {
+            if (currentUserData) {
+                document.getElementById('editFirstName').value = currentUserData.firstName || '';
+                document.getElementById('editLastName').value = currentUserData.lastName || '';
+                document.getElementById('editEmail').value = currentUserData.email || '';
+                document.getElementById('editPhone').value = currentUserData.phone || '';
+                document.getElementById('editAddress').value = currentUserData.address || '';
+            }
+            openModal('editProfileModal');
+        }
+
+        async function saveProfile() {
+            const firstName = document.getElementById('editFirstName').value.trim();
+            const lastName = document.getElementById('editLastName').value.trim();
+            const phone = document.getElementById('editPhone').value.trim();
+            const address = document.getElementById('editAddress').value.trim();
+
+            if (!firstName || !lastName) {
+                showToast('First and last name are required', 'error');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                await db.collection('users').doc(currentUser.uid).update({
+                    firstName,
+                    lastName,
+                    phone,
+                    address,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Update display
+                document.querySelectorAll('.user-name-display').forEach(el => {
+                    el.textContent = `${firstName} ${lastName}`;
+                });
+                document.getElementById('avatarInitials').textContent = `${firstName[0]}${lastName[0]}`;
+
+                hideLoading();
+                closeModal('editProfileModal');
+                showToast('Profile updated successfully!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Error updating profile:', error);
+                showToast('Failed to update profile', 'error');
+            }
+        }
+
+        // Change Password Modal
+        function openChangePasswordModal() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            openModal('changePasswordModal');
+        }
+
+        async function savePassword() {
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('All fields are required', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Reauthenticate user
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    currentUser.email,
+                    currentPassword
+                );
+                await currentUser.reauthenticateWithCredential(credential);
+
+                // Update password
+                await currentUser.updatePassword(newPassword);
+
+                hideLoading();
+                closeModal('changePasswordModal');
+                showToast('Password updated successfully!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Error changing password:', error);
+                if (error.code === 'auth/wrong-password') {
+                    showToast('Current password is incorrect', 'error');
+                } else {
+                    showToast('Failed to update password', 'error');
+                }
+            }
+        }
+
+        // Change PIN Modal
+        function openChangePinModal() {
+            document.getElementById('currentPin').value = '';
+            document.getElementById('newPin').value = '';
+            document.getElementById('confirmPin').value = '';
+            openModal('changePinModal');
+        }
+
+        async function savePin() {
+            const currentPin = document.getElementById('currentPin').value;
+            const newPin = document.getElementById('newPin').value;
+            const confirmPin = document.getElementById('confirmPin').value;
+
+            if (!currentPin || !newPin || !confirmPin) {
+                showToast('All fields are required', 'error');
+                return;
+            }
+
+            if (newPin.length !== 4 || !/^[0-9]+$/.test(newPin)) {
+                showToast('PIN must be 4 digits', 'error');
+                return;
+            }
+
+            if (newPin !== confirmPin) {
+                showToast('PINs do not match', 'error');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // Verify current PIN
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.data();
+
+                if (currentPin !== userData.transferPin) {
+                    hideLoading();
+                    showToast('Current PIN is incorrect', 'error');
+                    return;
+                }
+
+                // Update PIN
+                await db.collection('users').doc(currentUser.uid).update({
+                    transferPin: newPin,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                hideLoading();
+                closeModal('changePinModal');
+                showToast('PIN updated successfully!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Error changing PIN:', error);
+                showToast('Failed to update PIN', 'error');
+            }
+        }
+
+        // Notifications Modal
+        function openNotificationsModal() {
+            openModal('notificationsModal');
+        }
+
+        async function loadNotificationSettings() {
+            try {
+                const doc = await db.collection('settings').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const settings = doc.data();
+                    document.getElementById('transactionAlerts').checked = settings.transactionAlerts !== false;
+                    document.getElementById('loginAlerts').checked = settings.loginAlerts !== false;
+                    document.getElementById('promoEmails').checked = settings.promoEmails === true;
+                    document.getElementById('pushNotifications').checked = settings.pushNotifications !== false;
+                }
+            } catch (error) {
+                console.error('Error loading notification settings:', error);
+            }
+        }
+
+        async function saveNotifications() {
+            showLoading();
+
+            try {
+                await db.collection('settings').doc(currentUser.uid).set({
+                    transactionAlerts: document.getElementById('transactionAlerts').checked,
+                    loginAlerts: document.getElementById('loginAlerts').checked,
+                    promoEmails: document.getElementById('promoEmails').checked,
+                    pushNotifications: document.getElementById('pushNotifications').checked,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                hideLoading();
+                closeModal('notificationsModal');
+                showToast('Notification settings saved!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Error saving notification settings:', error);
+                showToast('Failed to save settings', 'error');
+            }
+        }
+
+        // Security Modal
+        function openSecurityModal() {
+            loadRecentActivity();
+            openModal('securityModal');
+        }
+
+        async function loadSecuritySettings() {
+            try {
+                const doc = await db.collection('settings').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const settings = doc.data();
+                    document.getElementById('twoFactorAuth').checked = settings.twoFactorAuth === true;
+                    document.getElementById('biometricLogin').checked = settings.biometricLogin === true;
+                    document.getElementById('sessionTimeout').checked = settings.sessionTimeout !== false;
+                }
+            } catch (error) {
+                console.error('Error loading security settings:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            try {
+                const snapshot = await db.collection('loginActivity')
+                    .where('userId', '==', currentUser.uid)
+                    .orderBy('createdAt', 'desc')
+                    .limit(5)
+                    .get();
+
+                const activityList = document.getElementById('recentActivity');
+                if (snapshot.empty) {
+                    activityList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">No recent activity</p>';
+                    return;
+                }
+
+                activityList.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const activity = doc.data();
+                    const date = activity.createdAt?.toDate?.() || new Date();
+                    const html = `
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-${activity.type === 'login' ? 'sign-in-alt' : 'sign-out-alt'}"></i>
+                            </div>
+                            <div class="activity-info">
+                                <span class="activity-title">${activity.type === 'login' ? 'Login' : 'Logout'}</span>
+                                <small class="activity-time">${date.toLocaleString()}</small>
+                            </div>
+                            <span class="activity-device">${activity.device || 'Unknown'}</span>
+                        </div>
+                    `;
+                    activityList.innerHTML += html;
+                });
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+                document.getElementById('recentActivity').innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px;">Failed to load activity</p>';
+            }
+        }
+
+        async function saveSecuritySettings() {
+            showLoading();
+
+            try {
+                await db.collection('settings').doc(currentUser.uid).set({
+                    twoFactorAuth: document.getElementById('twoFactorAuth').checked,
+                    biometricLogin: document.getElementById('biometricLogin').checked,
+                    sessionTimeout: document.getElementById('sessionTimeout').checked,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+
+                hideLoading();
+                closeModal('securityModal');
+                showToast('Security settings saved!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Error saving security settings:', error);
+                showToast('Failed to save settings', 'error');
+            }
+        }
+
+        // Helper functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
         function changeAvatar() {
             showToast('Avatar change coming soon!', 'info');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
         }
     </script>
 
@@ -346,6 +917,250 @@
         .btn-danger {
             background: var(--danger);
             color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+            padding: 0;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Settings */
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .setting-desc {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Security Activity */
+        .security-info {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .security-info h4 {
+            font-size: 14px;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(14, 165, 233, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-title {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .activity-time {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .activity-device {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(14, 165, 233, 0.2);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay p {
+            margin-top: 16px;
+            color: var(--text-primary);
         }
     </style>
 </body>

@@ -42,7 +42,7 @@ async function loadUserData(uid) {
 // Update UI with user data
 function updateUIWithUserData() {
     // Update balance displays
-    const balanceElements = document.querySelectorAll('.balance-amount');
+    const balanceElements = document.querySelectorAll('.balance-amount, .user-balance');
     balanceElements.forEach(el => {
         if (userData && userData.balance !== undefined) {
             el.textContent = formatCurrency(userData.balance);

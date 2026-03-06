@@ -7,6 +7,9 @@
     <title>Activity - City Prime Bank</title>
     <link rel="stylesheet" href="activity.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <!-- Status Bar -->
@@ -28,9 +31,9 @@
         <button class="icon-btn" onclick="toggleTheme()">
             <i class="fas fa-sun"></i>
         </button>
-        <button class="icon-btn notification">
+        <button class="icon-btn notification" onclick="window.location.href='notifications.html'">
             <i class="fas fa-bell"></i>
-            <span class="badge">4</span>
+            <span class="badge" id="notificationBadge">0</span>
         </button>
     </header>
 
@@ -49,57 +52,65 @@
             <input type="text" placeholder="Search transactions..." id="searchInput" onkeyup="searchTransactions()">
         </div>
 
-        <!-- Date Section -->
-        <div class="date-section">
-            <h3>Today</h3>
-            <div class="transaction-list" id="transactionList">
-                <div class="transaction-item" data-type="income">
-                    <div class="transaction-icon income">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    <div class="transaction-info">
-                        <h4>Credit</h4>
-                        <p>Deposit from Bank Transfer</p>
-                        <span class="time">02 Nov 2025, 17:00</span>
-                    </div>
-                    <div class="transaction-amount income">+$0.41</div>
-                </div>
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Loading transactions...</p>
+        </div>
 
-                <div class="transaction-item" data-type="income">
-                    <div class="transaction-icon income">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    <div class="transaction-info">
-                        <h4>Credit</h4>
-                        <p>Initial Deposit</p>
-                        <span class="time">21 Nov 2025, 05:59</span>
-                    </div>
-                    <div class="transaction-amount income">+$65,000.00</div>
-                </div>
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+            <i class="fas fa-receipt"></i>
+            <h3>No Transactions Yet</h3>
+            <p>Your transaction history will appear here</p>
+        </div>
+
+        <!-- Transaction Sections -->
+        <div id="transactionSections">
+            <!-- Today Section -->
+            <div class="date-section" id="todaySection">
+                <h3>Today</h3>
+                <div class="transaction-list" id="todayList"></div>
+            </div>
+
+            <!-- Yesterday Section -->
+            <div class="date-section" id="yesterdaySection">
+                <h3>Yesterday</h3>
+                <div class="transaction-list" id="yesterdayList"></div>
+            </div>
+
+            <!-- This Week Section -->
+            <div class="date-section" id="thisWeekSection">
+                <h3>This Week</h3>
+                <div class="transaction-list" id="thisWeekList"></div>
+            </div>
+
+            <!-- This Month Section -->
+            <div class="date-section" id="thisMonthSection">
+                <h3>This Month</h3>
+                <div class="transaction-list" id="thisMonthList"></div>
+            </div>
+
+            <!-- Older Section -->
+            <div class="date-section" id="olderSection">
+                <h3>Older</h3>
+                <div class="transaction-list" id="olderList"></div>
             </div>
         </div>
 
-        <!-- Yesterday -->
-        <div class="date-section">
-            <h3>Yesterday</h3>
-            <div class="empty-day">
-                <p>No transactions</p>
-            </div>
-        </div>
-
-        <!-- This Month -->
-        <div class="date-section">
-            <h3>This Month</h3>
+        <!-- Summary Cards -->
+        <div class="date-section" id="summarySection">
+            <h3>Summary</h3>
             <div class="summary-cards">
                 <div class="summary-card income">
                     <i class="fas fa-arrow-down"></i>
                     <span>Total Income</span>
-                    <strong>$65,000.41</strong>
+                    <strong id="totalIncome">$0.00</strong>
                 </div>
                 <div class="summary-card expense">
                     <i class="fas fa-arrow-up"></i>
                     <span>Total Expense</span>
-                    <strong>$0.00</strong>
+                    <strong id="totalExpense">$0.00</strong>
                 </div>
             </div>
         </div>
@@ -113,7 +124,7 @@
             </div>
             <span>Activity</span>
         </a>
-        <a href="transfer.html" class="nav-item">
+        <a href="send.html" class="nav-item">
             <i class="fas fa-paper-plane"></i>
             <span>Transfer</span>
         </a>
@@ -131,6 +142,7 @@
         </a>
     </nav>
 
+    <script src="firebase-config.js"></script>
     <script src="activity.js"></script>
 </body>
 </html>

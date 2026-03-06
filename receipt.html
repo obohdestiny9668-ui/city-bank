@@ -53,6 +53,10 @@
                         <span class="row-value" id="receiptDate">-</span>
                     </div>
                     <div class="receipt-row">
+                        <span class="row-label">Transfer Type</span>
+                        <span class="row-value" id="transferType">-</span>
+                    </div>
+                    <div class="receipt-row">
                         <span class="row-label">From</span>
                         <span class="row-value" id="senderName">-</span>
                     </div>
@@ -60,9 +64,17 @@
                         <span class="row-label">To</span>
                         <span class="row-value" id="receiverName">-</span>
                     </div>
+                    <div class="receipt-row" id="recipientDetailsRow">
+                        <span class="row-label">Recipient Details</span>
+                        <span class="row-value" id="recipientDetails">-</span>
+                    </div>
                     <div class="receipt-row">
                         <span class="row-label">Description</span>
-                        <span class="row-value">Local Transfer</span>
+                        <span class="row-value" id="description">-</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="row-label">Status</span>
+                        <span class="row-value status-completed" id="status">Completed</span>
                     </div>
                 </div>
 
@@ -80,6 +92,9 @@
             </button>
             <button class="btn btn-secondary btn-block" onclick="shareReceipt()" style="margin-top: 12px;">
                 <i class="fas fa-share-alt"></i> Share Receipt
+            </button>
+            <button class="btn btn-secondary btn-block" onclick="downloadReceipt()" style="margin-top: 12px;">
+                <i class="fas fa-download"></i> Download PDF
             </button>
             <a href="dashboard.html" class="btn btn-secondary btn-block" style="margin-top: 12px; text-decoration: none;">
                 <i class="fas fa-home"></i> Back to Home
@@ -113,6 +128,8 @@
 
     <script src="firebase-config.js"></script>
     <script>
+        let currentTransaction = null;
+
         // Check auth
         auth.onAuthStateChanged((user) => {
             if (!user) {
@@ -134,18 +151,140 @@
             try {
                 const doc = await db.collection('transactions').doc(txnId).get();
                 if (doc.exists) {
-                    const txn = doc.data();
-                    
-                    document.getElementById('receiptAmount').textContent = formatCurrency(txn.amount);
-                    document.getElementById('receiptId').textContent = txn.receiptId || 'N/A';
-                    document.getElementById('transactionId').textContent = txn.transactionId;
-                    document.getElementById('receiptDate').textContent = formatDate(txn.createdAt);
-                    document.getElementById('senderName').textContent = `${txn.senderName} (${txn.senderEmail})`;
-                    document.getElementById('receiverName').textContent = `${txn.receiverName} (${txn.receiverEmail})`;
+                    currentTransaction = doc.data();
+                    displayReceipt(currentTransaction);
+                } else {
+                    showToast('Transaction not found', 'error');
                 }
             } catch (error) {
                 console.error('Error loading receipt:', error);
+                showToast('Error loading receipt', 'error');
             }
+        }
+
+        function displayReceipt(txn) {
+            // Amount
+            document.getElementById('receiptAmount').textContent = formatCurrency(txn.amount);
+            
+            // IDs
+            document.getElementById('receiptId').textContent = txn.receiptId || 'N/A';
+            document.getElementById('transactionId').textContent = txn.transactionId;
+            
+            // Date
+            document.getElementById('receiptDate').textContent = formatDateTime(txn.createdAt);
+            
+            // Transfer Type
+            const transferTypeLabels = {
+                'local': 'Local Transfer',
+                'wire': 'Wire Transfer',
+                'crypto': 'Cryptocurrency',
+                'paypal': 'PayPal',
+                'wise': 'Wise Transfer',
+                'cashapp': 'Cash App',
+                'skrill': 'Skrill',
+                'venmo': 'Venmo',
+                'zelle': 'Zelle',
+                'revolut': 'Revolut',
+                'alipay': 'Alipay',
+                'wechat': 'WeChat Pay'
+            };
+            document.getElementById('transferType').textContent = transferTypeLabels[txn.transferType] || txn.transferType;
+            
+            // Sender
+            document.getElementById('senderName').textContent = `${txn.senderName} (${txn.senderEmail})`;
+            
+            // Receiver - handle different transfer types
+            let receiverText = '';
+            let recipientDetailsText = '';
+            
+            if (txn.transferType === 'local') {
+                receiverText = txn.receiverName ? `${txn.receiverName} (${txn.receiverEmail})` : 'Unknown';
+                document.getElementById('recipientDetailsRow').style.display = 'none';
+            } else if (txn.transferType === 'wire') {
+                receiverText = txn.recipientData?.beneficiaryName || 'Unknown';
+                recipientDetailsText = `
+                    Bank: ${txn.recipientData?.bankName || 'N/A'}
+                    Account: ${maskAccountNumber(txn.recipientData?.accountNumber)}
+                    SWIFT: ${txn.recipientData?.swiftCode || 'N/A'}
+                `;
+            } else if (txn.transferType === 'crypto') {
+                receiverText = 'Crypto Wallet';
+                recipientDetailsText = `
+                    Type: ${txn.recipientData?.cryptoType || 'N/A'}
+                    Network: ${txn.recipientData?.network || 'N/A'}
+                    Address: ${maskWalletAddress(txn.recipientData?.walletAddress)}
+                `;
+            } else if (txn.transferType === 'paypal') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `PayPal: ${txn.recipientData?.email || 'N/A'}`;
+            } else if (txn.transferType === 'wise') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `
+                    Email: ${txn.recipientData?.email || 'N/A'}
+                    Currency: ${txn.recipientData?.currency || 'USD'}
+                `;
+            } else if (txn.transferType === 'cashapp') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `Cashtag: ${txn.recipientData?.cashtag || 'N/A'}`;
+            } else if (txn.transferType === 'skrill') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `Email: ${txn.recipientData?.email || 'N/A'}`;
+            } else if (txn.transferType === 'venmo') {
+                receiverText = txn.recipientData?.username || 'Unknown';
+                recipientDetailsText = txn.recipientData?.note ? `Note: ${txn.recipientData.note}` : '';
+            } else if (txn.transferType === 'zelle') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `Contact: ${txn.recipientData?.recipient || 'N/A'}`;
+            } else if (txn.transferType === 'revolut') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `Contact: ${txn.recipientData?.recipient || 'N/A'}`;
+            } else if (txn.transferType === 'alipay') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `Alipay ID: ${txn.recipientData?.alipayId || 'N/A'}`;
+            } else if (txn.transferType === 'wechat') {
+                receiverText = txn.recipientData?.recipientName || 'Unknown';
+                recipientDetailsText = `WeChat ID: ${txn.recipientData?.wechatId || 'N/A'}`;
+            } else {
+                receiverText = txn.receiverName || 'Unknown';
+                document.getElementById('recipientDetailsRow').style.display = 'none';
+            }
+            
+            document.getElementById('receiverName').textContent = receiverText;
+            if (recipientDetailsText) {
+                document.getElementById('recipientDetails').textContent = recipientDetailsText;
+            }
+            
+            // Description
+            document.getElementById('description').textContent = txn.description || 'Transfer';
+            
+            // Status
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = txn.status ? txn.status.charAt(0).toUpperCase() + txn.status.slice(1) : 'Completed';
+            statusEl.className = 'row-value status-' + (txn.status || 'completed');
+        }
+
+        function maskAccountNumber(accountNumber) {
+            if (!accountNumber) return 'N/A';
+            if (accountNumber.length <= 4) return accountNumber;
+            return '****' + accountNumber.slice(-4);
+        }
+
+        function maskWalletAddress(address) {
+            if (!address) return 'N/A';
+            if (address.length <= 10) return address;
+            return address.slice(0, 6) + '...' + address.slice(-4);
+        }
+
+        function formatDateTime(timestamp) {
+            if (!timestamp) return 'N/A';
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         function printReceipt() {
@@ -153,7 +292,111 @@
         }
 
         function shareReceipt() {
-            showToast('Share feature coming soon!', 'info');
+            if (navigator.share) {
+                navigator.share({
+                    title: 'City Prime Bank Receipt',
+                    text: `Transfer of ${formatCurrency(currentTransaction?.amount || 0)} - Receipt ID: ${currentTransaction?.receiptId || 'N/A'}`,
+                    url: window.location.href
+                }).catch(err => console.log('Share cancelled'));
+            } else {
+                // Fallback - copy to clipboard
+                const receiptText = `
+City Prime Bank Receipt
+------------------------
+Amount: ${formatCurrency(currentTransaction?.amount || 0)}
+Receipt ID: ${currentTransaction?.receiptId || 'N/A'}
+Transaction ID: ${currentTransaction?.transactionId || 'N/A'}
+Date: ${formatDateTime(currentTransaction?.createdAt)}
+Status: ${currentTransaction?.status || 'Completed'}
+                `.trim();
+                
+                navigator.clipboard.writeText(receiptText).then(() => {
+                    showToast('Receipt copied to clipboard!', 'success');
+                }).catch(() => {
+                    showToast('Share feature not available', 'error');
+                });
+            }
+        }
+
+        function downloadReceipt() {
+            // Create a simple PDF-like text file
+            const receiptContent = `
+================================
+    CITY PRIME BANK RECEIPT
+================================
+
+Transfer Status: SUCCESSFUL
+
+AMOUNT: ${formatCurrency(currentTransaction?.amount || 0)}
+
+--------------------------------
+RECEIPT DETAILS
+--------------------------------
+Receipt ID: ${currentTransaction?.receiptId || 'N/A'}
+Transaction ID: ${currentTransaction?.transactionId || 'N/A'}
+Date & Time: ${formatDateTime(currentTransaction?.createdAt)}
+Transfer Type: ${currentTransaction?.transferType || 'N/A'}
+Status: ${currentTransaction?.status || 'Completed'}
+
+--------------------------------
+SENDER INFORMATION
+--------------------------------
+Name: ${currentTransaction?.senderName || 'N/A'}
+Email: ${currentTransaction?.senderEmail || 'N/A'}
+
+--------------------------------
+RECIPIENT INFORMATION
+--------------------------------
+${getRecipientInfo()}
+
+--------------------------------
+Description: ${currentTransaction?.description || 'Transfer'}
+
+================================
+Thank you for banking with City Prime Bank
+Please keep this receipt for your records
+================================
+            `.trim();
+
+            const blob = new Blob([receiptContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Receipt-${currentTransaction?.receiptId || 'Transaction'}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Receipt downloaded!', 'success');
+        }
+
+        function getRecipientInfo() {
+            if (!currentTransaction?.recipientData) {
+                return `Name: ${currentTransaction?.receiverName || 'N/A'}
+Email: ${currentTransaction?.receiverEmail || 'N/A'}`;
+            }
+            
+            const data = currentTransaction.recipientData;
+            let info = '';
+            
+            if (data.beneficiaryName) info += `Name: ${data.beneficiaryName}\n`;
+            if (data.bankName) info += `Bank: ${data.bankName}\n`;
+            if (data.accountNumber) info += `Account: ${maskAccountNumber(data.accountNumber)}\n`;
+            if (data.swiftCode) info += `SWIFT: ${data.swiftCode}\n`;
+            if (data.cryptoType) info += `Crypto: ${data.cryptoType}\n`;
+            if (data.walletAddress) info += `Wallet: ${maskWalletAddress(data.walletAddress)}\n`;
+            if (data.network) info += `Network: ${data.network}\n`;
+            if (data.email) info += `Email: ${data.email}\n`;
+            if (data.cashtag) info += `Cashtag: ${data.cashtag}\n`;
+            if (data.username) info += `Username: ${data.username}\n`;
+            if (data.recipient) info += `Contact: ${data.recipient}\n`;
+            if (data.alipayId) info += `Alipay ID: ${data.alipayId}\n`;
+            if (data.wechatId) info += `WeChat ID: ${data.wechatId}\n`;
+            if (data.currency) info += `Currency: ${data.currency}\n`;
+            if (data.recipientName) info += `Recipient: ${data.recipientName}\n`;
+            
+            return info || 'N/A';
         }
     </script>
 
@@ -255,6 +498,18 @@
             word-break: break-word;
         }
 
+        .row-value.status-completed {
+            color: var(--success);
+        }
+
+        .row-value.status-pending {
+            color: var(--warning);
+        }
+
+        .row-value.status-failed {
+            color: var(--danger);
+        }
+
         .receipt-footer {
             padding: 20px 24px;
             background: var(--bg-secondary);
@@ -271,12 +526,24 @@
             font-size: 11px !important;
         }
 
+        #recipientDetails {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+
         @media print {
             .header, .bottom-nav, .btn {
                 display: none !important;
             }
             .receipt-card {
                 box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            body {
+                background: white;
+            }
+            .mobile-container {
+                max-width: 100%;
             }
         }
     </style>
