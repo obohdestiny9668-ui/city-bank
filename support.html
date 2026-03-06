@@ -1,0 +1,194 @@
+<!-- support.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Support - City Prime Bank</title>
+    <link rel="stylesheet" href="support.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="time" id="clock">7:02</div>
+        <div class="status-icons">
+            <i class="fas fa-signal"></i>
+            <i class="fas fa-wifi"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <button class="back-btn" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1>Email Support</h1>
+        <button class="icon-btn" onclick="toggleTheme()">
+            <i class="fas fa-sun"></i>
+        </button>
+        <button class="icon-btn notification">
+            <i class="fas fa-bell"></i>
+            <span class="badge">4</span>
+        </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Support Header -->
+        <div class="support-header">
+            <div class="support-icon">
+                <i class="fas fa-envelope"></i>
+            </div>
+            <h2>Send us a Message</h2>
+            <p>We typically respond within 24 hours</p>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="contact-info">
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <div>
+                    <span>Email</span>
+                    <strong>support@cityprime.emiinnovation.org</strong>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <span>Response Time</span>
+                    <strong>Within 24 hours</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Form -->
+        <form id="supportForm" class="support-form">
+            <div class="form-group">
+                <label>Subject</label>
+                <div class="select-wrapper">
+                    <select required>
+                        <option value="">Select a topic</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="account">Account Issues</option>
+                        <option value="transfer">Transfer Problems</option>
+                        <option value="card">Card Issues</option>
+                        <option value="deposit">Deposit/Withdrawal</option>
+                        <option value="security">Security Concerns</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Your Name</label>
+                <input type="text" id="supportName" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="supportEmail" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label>Account Number (Optional)</label>
+                <input type="text" placeholder="Enter your account number">
+            </div>
+
+            <div class="form-group">
+                <label>Message</label>
+                <textarea rows="6" placeholder="Describe your issue in detail..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Attachments (Optional)</label>
+                <div class="file-upload" id="fileUpload">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload or drag and drop</p>
+                    <span>PNG, JPG or PDF (max. 5MB)</span>
+                    <input type="file" id="attachment" accept="image/*,.pdf" hidden>
+                </div>
+                <div class="file-name" id="fileName" style="display: none;"></div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+        </form>
+
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How do I reset my password?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>You can reset your password by clicking on "Forgot password" on the login page. We'll send you a reset link via email.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>How long do transfers take?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Local transfers are instant. International wire transfers typically take 24-72 hours depending on the destination country and bank.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is my money safe with City Prime?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Yes! We use bank-grade 256-bit SSL encryption and are FDIC insured. Your funds are protected up to $250,000.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Message Sent!</h3>
+            <p>We've received your message and will respond within 24 hours.</p>
+            <button class="btn-primary" onclick="closeModal()">Got it</button>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="activity.html" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Activity</span>
+        </a>
+        <a href="transfer.html" class="nav-item">
+            <i class="fas fa-paper-plane"></i>
+            <span>Transfer</span>
+        </a>
+        <a href="dashboard.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="cards.html" class="nav-item">
+            <i class="fas fa-credit-card"></i>
+            <span>Cards</span>
+        </a>
+        <a href="profile.html" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="support.js"></script>
+</body>
+</html>
