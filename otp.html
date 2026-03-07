@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OTP Verification - City Prime Bank</title>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="mobile-container">
+
+<!-- Header -->
+<div class="auth-header">
+<a href="login.html" class="back-btn">
+<i class="fas fa-arrow-left"></i>
+</a>
+
+<div class="auth-logo">
+<i class="fas fa-university"></i>
+<span>City Prime Bank</span>
+</div>
+
+<div class="spacer"></div>
+</div>
+
+<!-- OTP Section -->
+<div class="auth-content">
+
+<div class="auth-icon">
+<i class="fas fa-shield-alt"></i>
+</div>
+
+<h1 class="auth-title">Verify Login</h1>
+<p class="auth-subtitle">Enter the verification code sent to your email</p>
+
+<form id="otpForm" class="auth-form">
+
+<div class="form-group">
+<label class="form-label">Verification Code</label>
+
+<div class="input-wrapper">
+<i class="fas fa-key"></i>
+<input type="number" id="otpInput" class="form-input" placeholder="Enter 6-digit code" required>
+</div>
+
+</div>
+
+<button type="submit" class="btn btn-primary btn-block">
+<i class="fas fa-check"></i> Verify Code
+</button>
+
+</form>
+
+<p class="auth-footer">
+Didn't receive the code? <a href="login.html">Login again</a>
+</p>
+
+</div>
+
+</div>
+
+<script>
+
+document.getElementById("otpForm").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const enteredOTP = document.getElementById("otpInput").value;
+const savedOTP = localStorage.getItem("loginOTP");
+
+if(enteredOTP === savedOTP){
+
+// remove OTP after successful verification
+localStorage.removeItem("loginOTP");
+localStorage.removeItem("loginEmail");
+
+// redirect to dashboard
+window.location.href = "dashboard.html";
+
+}else{
+
+alert("Invalid verification code");
+
+}
+
+});
+
+</script>
+
+</body>
+</html>

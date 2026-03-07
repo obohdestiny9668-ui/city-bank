@@ -1,214 +1,202 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - City Prime Bank</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="auth.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - City Prime Bank</title>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="auth.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<!-- EmailJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+(function(){
+emailjs.init("xlx20WEQxwkisNBcp");
+})();
+</script>
+
 </head>
+
 <body>
-    <div class="mobile-container">
-        <!-- Auth Header -->
-        <div class="auth-header">
-            <a href="index.html" class="back-btn">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <div class="auth-logo">
-                <i class="fas fa-university"></i>
-                <span>City Prime Bank</span>
-            </div>
-            <div class="spacer"></div>
-        </div>
 
-        <!-- Login Form -->
-        <div class="auth-content">
-            <div class="auth-icon">
-                <i class="fas fa-sign-in-alt"></i>
-            </div>
-            <h1 class="auth-title">Welcome Back</h1>
-            <p class="auth-subtitle">Sign in to access your account</p>
+<div class="mobile-container">
 
-            <form id="loginForm" class="auth-form">
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
-                    </div>
-                </div>
+<div class="auth-header">
+<a href="index.html" class="back-btn">
+<i class="fas fa-arrow-left"></i>
+</a>
 
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div class="input-wrapper">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
-                        <button type="button" class="toggle-password" onclick="togglePassword()">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
+<div class="auth-logo">
+<i class="fas fa-university"></i>
+<span>City Prime Bank</span>
+</div>
 
-                <div class="form-options">
-                    <label class="checkbox-wrapper">
-                        <input type="checkbox" id="rememberMe">
-                        <span class="checkmark"></span>
-                        <span class="checkbox-label">Remember me</span>
-                    </label>
-                    <a href="forgot-password.html" class="forgot-link">Forgot Password?</a>
-                </div>
+<div class="spacer"></div>
+</div>
 
-                <button type="submit" class="btn btn-primary btn-block">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
-            </form>
+<div class="auth-content">
 
-            <div class="auth-divider">
-                <span>or continue with</span>
-            </div>
+<div class="auth-icon">
+<i class="fas fa-sign-in-alt"></i>
+</div>
 
-            <div class="social-login">
-                <button class="social-btn" onclick="socialLogin('google')">
-                    <i class="fab fa-google"></i>
-                </button>
-                <button class="social-btn" onclick="socialLogin('apple')">
-                    <i class="fab fa-apple"></i>
-                </button>
-            </div>
+<h1 class="auth-title">Welcome Back</h1>
+<p class="auth-subtitle">Sign in to access your account</p>
 
-            <p class="auth-footer">
-                Don't have an account? <a href="register.html">Register</a>
-            </p>
-        </div>
-    </div>
+<form id="loginForm" class="auth-form">
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loading-spinner"></div>
-        <p>Signing in...</p>
-    </div>
+<div class="form-group">
+<label class="form-label">Email Address</label>
+<div class="input-wrapper">
+<i class="fas fa-envelope"></i>
+<input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+</div>
+</div>
+
+<div class="form-group">
+<label class="form-label">Password</label>
+<div class="input-wrapper">
+<i class="fas fa-lock"></i>
+
+<input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+
+<button type="button" class="toggle-password" onclick="togglePassword()">
+<i class="fas fa-eye"></i>
+</button>
+
+</div>
+</div>
+
+<div class="form-options">
+
+<label class="checkbox-wrapper">
+<input type="checkbox" id="rememberMe">
+<span class="checkmark"></span>
+<span class="checkbox-label">Remember me</span>
+</label>
+
+<a href="forgot-password.html" class="forgot-link">Forgot Password?</a>
+
+</div>
+
+<button type="submit" class="btn btn-primary btn-block">
+<i class="fas fa-sign-in-alt"></i> Sign In
+</button>
+
+</form>
+
+<p class="auth-footer">
+Don't have an account? <a href="register.html">Register</a>
+</p>
+
+</div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+<div class="loading-spinner"></div>
+<p>Signing in...</p>
+</div>
+
 <script src="firebase-config.js"></script>
 
 <script>
-function togglePassword() {
-    const passwordInput = document.getElementById('password');
-    const toggleBtn = document.querySelector('.toggle-password i');
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleBtn.classList.remove('fa-eye');
-        toggleBtn.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        toggleBtn.classList.remove('fa-eye-slash');
-        toggleBtn.classList.add('fa-eye');
-    }
+
+function togglePassword(){
+
+const passwordInput=document.getElementById('password');
+const toggleBtn=document.querySelector('.toggle-password i');
+
+if(passwordInput.type==='password'){
+passwordInput.type='text';
+toggleBtn.classList.remove('fa-eye');
+toggleBtn.classList.add('fa-eye-slash');
+}else{
+passwordInput.type='password';
+toggleBtn.classList.remove('fa-eye-slash');
+toggleBtn.classList.add('fa-eye');
 }
 
-function socialLogin(provider) {
-    showToast(`${provider} login coming soon!`, 'info');
 }
 
+document.getElementById('loginForm').addEventListener('submit',async(e)=>{
 
-// LOGIN FORM
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    document.getElementById('loadingOverlay').classList.remove('hidden');
-    
-    try {
+e.preventDefault();
 
-        const userCredential = await auth.signInWithEmailAndPassword(email, password);
-        const user = userCredential.user;
+const email=document.getElementById('email').value;
+const password=document.getElementById('password').value;
 
-        const userDoc = await db.collection('users').doc(user.uid).get();
+document.getElementById('loadingOverlay').classList.remove('hidden');
 
-        if (!userDoc.exists) {
-            document.getElementById('loadingOverlay').classList.add('hidden');
-            showToast("User record not found.", "error");
-            return;
-        }
+try{
 
-        const userData = userDoc.data();
+const userCredential=await auth.signInWithEmailAndPassword(email,password);
+const user=userCredential.user;
 
-        await db.collection('users').doc(user.uid).update({
-            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        });
+const userDoc=await db.collection('users').doc(user.uid).get();
 
-        document.getElementById('loadingOverlay').classList.add('hidden');
+if(!userDoc.exists){
 
+document.getElementById('loadingOverlay').classList.add('hidden');
+showToast("User record not found.","error");
+return;
 
-        // 🔐 ADMIN LOGIN (NO VERIFICATION)
-        if (userData.role === 'admin') {
+}
 
-            window.location.href = "admin.html";
-            return;
+const userData=userDoc.data();
 
-        }
+await db.collection('users').doc(user.uid).update({
+lastLogin:firebase.firestore.FieldValue.serverTimestamp()
+});
 
+document.getElementById('loadingOverlay').classList.add('hidden');
 
-        // 👤 USER LOGIN → SEND EMAIL VERIFICATION LINK
-        const actionCodeSettings = {
-            url: window.location.origin + "/dashboard.html",
-            handleCodeInApp: true
-        };
+if(userData.role==="admin"){
 
-        await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+window.location.href="admin.html";
+return;
 
-        localStorage.setItem('emailForSignIn', email);
+}
 
-        showToast("Verification link sent to your email. Please check your inbox.", "success");
+const otp=Math.floor(100000+Math.random()*900000);
 
-        auth.signOut();
+localStorage.setItem("loginOTP",otp);
+localStorage.setItem("loginEmail",email);
 
+await emailjs.send("service_jinqyga","template_9xua3pk",{
+email:email,
+passcode:otp,
+time:"15 minutes"
+});
 
-    } catch (error) {
+showToast("Verification code sent to your email.","success");
 
-        document.getElementById('loadingOverlay').classList.add('hidden');
-        
-        let message = 'Login failed. Please try again.';
+window.location.href="otp.html";
 
-        if (error.code === 'auth/user-not-found') message = 'No account found with this email.';
-        if (error.code === 'auth/wrong-password') message = 'Incorrect password.';
-        if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
-        if (error.code === 'auth/user-disabled') message = 'This account has been disabled.';
+}catch(error){
 
-        showToast(message, 'error');
+document.getElementById('loadingOverlay').classList.add('hidden');
 
-    }
+let message='Login failed. Please try again.';
+
+if(error.code==='auth/user-not-found')message='No account found with this email.';
+if(error.code==='auth/wrong-password')message='Incorrect password.';
+if(error.code==='auth/invalid-email')message='Invalid email address.';
+if(error.code==='auth/user-disabled')message='This account has been disabled.';
+
+showToast(message,'error');
+
+}
 
 });
 
-
-// AUTO REDIRECT IF ALREADY LOGGED IN
-auth.onAuthStateChanged((user) => {
-
-    if (!user) return;
-
-    db.collection('users').doc(user.uid).get().then((doc) => {
-
-        if (!doc.exists) return;
-
-        const userData = doc.data();
-
-        if (userData.role === 'admin') {
-
-            window.location.href = "admin.html";
-
-        } else {
-
-            window.location.href = "dashboard.html";
-
-        }
-
-    });
-
-});
 </script>
+
+</body>
+</html>
