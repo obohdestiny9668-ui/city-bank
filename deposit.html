@@ -23,20 +23,12 @@
             <div style="width: 40px;"></div>
         </header>
 
-        <!-- Deposit Methods -->
+        <!-- Deposit Methods - Bitcoin Only -->
         <div class="section">
             <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Select Deposit Method</h3>
-            
+
             <div class="deposit-methods">
-                <div class="deposit-method active" onclick="selectMethod('usdt')">
-                    <div class="deposit-icon green"><i class="fas fa-coins"></i></div>
-                    <span>USDT</span>
-                </div>
-                <div class="deposit-method" onclick="selectMethod('eth')">
-                    <div class="deposit-icon purple"><i class="fab fa-ethereum"></i></div>
-                    <span>Ethereum</span>
-                </div>
-                <div class="deposit-method" onclick="selectMethod('btc')">
+                <div class="deposit-method active" onclick="selectMethod('btc')">
                     <div class="deposit-icon orange"><i class="fab fa-bitcoin"></i></div>
                     <span>Bitcoin</span>
                 </div>
@@ -47,16 +39,16 @@
         <div class="section">
             <div class="qr-card">
                 <div class="qr-header">
-                    <div class="qr-icon green"><i class="fas fa-coins"></i></div>
+                    <div class="qr-icon orange"><i class="fab fa-bitcoin"></i></div>
                     <div>
-                        <div class="qr-title">USDT Deposit</div>
-                        <div class="qr-subtitle">Tether (TRC20)</div>
+                        <div class="qr-title">Bitcoin Deposit</div>
+                        <div class="qr-subtitle">BTC Network</div>
                     </div>
                 </div>
-                
+
                 <div class="qr-code-container">
                     <div class="qr-code">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TXYZ1234567890ABCDEF" alt="QR Code">
+                        <img src="/mnt/kimi/upload/1000736988(1).jpg" alt="QR Code">
                     </div>
                     <p class="qr-hint">Scan QR code to deposit</p>
                 </div>
@@ -64,7 +56,7 @@
                 <div class="wallet-address">
                     <label>Wallet Address</label>
                     <div class="address-box">
-                        <span id="walletAddress">TXYZ1234567890ABCDEF</span>
+                        <span id="walletAddress">1pDjEtZ9hPZ2TrkfSZUgEFwcyVV8S7uSM</span>
                         <button class="copy-btn" onclick="copyAddress()">
                             <i class="fas fa-copy"></i>
                         </button>
@@ -74,15 +66,15 @@
                 <div class="deposit-info">
                     <div class="info-item">
                         <span class="info-label">Network</span>
-                        <span class="info-value">TRC20</span>
+                        <span class="info-value">Bitcoin (BTC)</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Minimum Deposit</span>
-                        <span class="info-value">10 USDT</span>
+                        <span class="info-value">0.001 BTC</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Processing Time</span>
-                        <span class="info-value">5-30 minutes</span>
+                        <span class="info-value">10-60 minutes</span>
                     </div>
                 </div>
             </div>
@@ -93,7 +85,7 @@
             <div class="upload-card">
                 <h3 style="font-size: 14px; margin-bottom: 16px;">Upload Payment Proof</h3>
                 <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Upload a screenshot of your successful transaction</p>
-                
+
                 <div class="upload-area" onclick="document.getElementById('proofFile').click()">
                     <input type="file" id="proofFile" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
                     <i class="fas fa-cloud-upload-alt"></i>
@@ -122,10 +114,10 @@
             </div>
             <div class="activity-list">
                 <div class="activity-item">
-                    <div class="activity-icon green"><i class="fas fa-arrow-down"></i></div>
+                    <div class="activity-icon orange"><i class="fab fa-bitcoin"></i></div>
                     <div class="activity-details">
-                        <div class="activity-title">USDT Deposit</div>
-                        <div class="activity-amount">+$500.00</div>
+                        <div class="activity-title">Bitcoin Deposit</div>
+                        <div class="activity-amount">+0.005 BTC</div>
                         <div class="activity-date">Nov 21, 2025, 05:59</div>
                     </div>
                     <span class="status-badge">Completed</span>
@@ -173,20 +165,6 @@
             }
         });
 
-        function selectMethod(method) {
-            document.querySelectorAll('.deposit-method').forEach(m => m.classList.remove('active'));
-            event.target.closest('.deposit-method').classList.add('active');
-            
-            const addresses = {
-                usdt: 'TXYZ1234567890ABCDEF',
-                eth: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
-                btc: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'
-            };
-            
-            document.getElementById('walletAddress').textContent = addresses[method];
-            showToast(`${method.toUpperCase()} selected`, 'success');
-        }
-
         function copyAddress() {
             const address = document.getElementById('walletAddress').textContent;
             navigator.clipboard.writeText(address).then(() => {
@@ -219,7 +197,7 @@
                 showToast('Please upload payment proof', 'error');
                 return;
             }
-            
+
             showToast('Deposit submitted for review!', 'success');
             setTimeout(() => {
                 removeUpload();
@@ -259,8 +237,8 @@
         }
 
         .deposit-method.active {
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
         }
 
         .deposit-icon {
@@ -273,8 +251,6 @@
             font-size: 24px;
         }
 
-        .deposit-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .deposit-icon.purple { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
         .deposit-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
 
         .deposit-method span {
@@ -306,7 +282,7 @@
             font-size: 24px;
         }
 
-        .qr-icon.green { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .qr-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
 
         .qr-title {
             font-size: 16px;
