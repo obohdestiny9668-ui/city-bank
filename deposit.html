@@ -1,446 +1,579 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deposit - City Prime Bank</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deposit - City Prime Bank</title>
+
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
 </head>
+
 <body>
-    <div class="mobile-container">
-        <!-- Header -->
-        <header class="header">
-            <a href="dashboard.html" class="back-btn" style="color: var(--text-primary);">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <div class="greeting" style="flex: 1; text-align: center;">
-                <div class="greeting-name">Fund Your Account</div>
-            </div>
-            <div style="width: 40px;"></div>
-        </header>
 
-        <!-- Deposit Methods - Bitcoin Only -->
-        <div class="section">
-            <h3 style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px;">Select Deposit Method</h3>
+<div class="mobile-container">
 
-            <div class="deposit-methods">
-                <div class="deposit-method active" onclick="selectMethod('btc')">
-                    <div class="deposit-icon orange"><i class="fab fa-bitcoin"></i></div>
-                    <span>Bitcoin</span>
-                </div>
-            </div>
-        </div>
+<header class="header">
+<a href="dashboard.html" class="back-btn" style="color: var(--text-primary);">
+<i class="fas fa-arrow-left"></i>
+</a>
 
-        <!-- QR Code Section -->
-        <div class="section">
-            <div class="qr-card">
-                <div class="qr-header">
-                    <div class="qr-icon orange"><i class="fab fa-bitcoin"></i></div>
-                    <div>
-                        <div class="qr-title">Bitcoin Deposit</div>
-                        <div class="qr-subtitle">BTC Network</div>
-                    </div>
-                </div>
+<div class="greeting" style="flex:1;text-align:center;">
+<div class="greeting-name">Fund Your Account</div>
+</div>
 
-                <div class="qr-code-container">
-                    <div class="qr-code">
-                        <img src="/mnt/kimi/upload/1000736988(1).jpg" alt="QR Code">
-                    </div>
-                    <p class="qr-hint">Scan QR code to deposit</p>
-                </div>
+<div style="width:40px;"></div>
+</header>
 
-                <div class="wallet-address">
-                    <label>Wallet Address</label>
-                    <div class="address-box">
-                        <span id="walletAddress">1pDjEtZ9hPZ2TrkfSZUgEFwcyVV8S7uSM</span>
-                        <button class="copy-btn" onclick="copyAddress()">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
-                </div>
 
-                <div class="deposit-info">
-                    <div class="info-item">
-                        <span class="info-label">Network</span>
-                        <span class="info-value">Bitcoin (BTC)</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Minimum Deposit</span>
-                        <span class="info-value">0.001 BTC</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Processing Time</span>
-                        <span class="info-value">10-60 minutes</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Deposit Method -->
+<div class="section">
 
-        <!-- Upload Proof -->
-        <div class="section">
-            <div class="upload-card">
-                <h3 style="font-size: 14px; margin-bottom: 16px;">Upload Payment Proof</h3>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">Upload a screenshot of your successful transaction</p>
+<h3 style="font-size:14px;color:var(--text-muted);margin-bottom:16px;">
+Select Deposit Method
+</h3>
 
-                <div class="upload-area" onclick="document.getElementById('proofFile').click()">
-                    <input type="file" id="proofFile" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <span>Click to upload or drag and drop</span>
-                    <small>PNG, JPG up to 5MB</small>
-                </div>
+<div class="deposit-methods">
 
-                <div id="uploadPreview" class="upload-preview hidden">
-                    <img id="previewImage" src="" alt="Preview">
-                    <button class="remove-btn" onclick="removeUpload()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+<div class="deposit-method active">
 
-                <button class="btn btn-primary btn-block" onclick="submitDeposit()" style="margin-top: 16px;">
-                    <i class="fas fa-check-circle"></i> Submit Deposit
-                </button>
-            </div>
-        </div>
+<div class="deposit-icon orange">
+<i class="fab fa-bitcoin"></i>
+</div>
 
-        <!-- Recent Deposits -->
-        <div class="section">
-            <div class="section-header">
-                <h3 class="section-title">Recent Deposits</h3>
-                <a href="#" class="section-link">View All <i class="fas fa-chevron-right"></i></a>
-            </div>
-            <div class="activity-list">
-                <div class="activity-item">
-                    <div class="activity-icon orange"><i class="fab fa-bitcoin"></i></div>
-                    <div class="activity-details">
-                        <div class="activity-title">Bitcoin Deposit</div>
-                        <div class="activity-amount">+0.005 BTC</div>
-                        <div class="activity-date">Nov 21, 2025, 05:59</div>
-                    </div>
-                    <span class="status-badge">Completed</span>
-                </div>
-            </div>
-        </div>
+<span>Bitcoin</span>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="activity.html" class="nav-item">
-                <i class="fas fa-chart-line"></i>
-                <span>Activity</span>
-            </a>
-            <a href="send.html" class="nav-item">
-                <i class="fas fa-paper-plane"></i>
-                <span>Transfer</span>
-            </a>
-            <a href="dashboard.html" class="nav-item">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="cards.html" class="nav-item">
-                <i class="fas fa-credit-card"></i>
-                <span>Cards</span>
-            </a>
-            <a href="profile.html" class="nav-item">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-        </nav>
-    </div>
+</div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loading-spinner"></div>
-        <p>Processing...</p>
-    </div>
+</div>
 
-    <script src="firebase-config.js"></script>
-    <script>
-        // Check auth
-        auth.onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-            }
-        });
+</div>
 
-        function copyAddress() {
-            const address = document.getElementById('walletAddress').textContent;
-            navigator.clipboard.writeText(address).then(() => {
-                showToast('Address copied to clipboard!', 'success');
-            });
-        }
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('previewImage').src = e.target.result;
-                    document.getElementById('uploadPreview').classList.remove('hidden');
-                    document.querySelector('.upload-area').classList.add('hidden');
-                };
-                reader.readAsDataURL(file);
-            }
-        }
 
-        function removeUpload() {
-            document.getElementById('proofFile').value = '';
-            document.getElementById('uploadPreview').classList.add('hidden');
-            document.querySelector('.upload-area').classList.remove('hidden');
-        }
+<!-- QR CODE -->
+<div class="section">
 
-        function submitDeposit() {
-            const file = document.getElementById('proofFile').files[0];
-            if (!file) {
-                showToast('Please upload payment proof', 'error');
-                return;
-            }
+<div class="qr-card">
 
-            showToast('Deposit submitted for review!', 'success');
-            setTimeout(() => {
-                removeUpload();
-            }, 2000);
-        }
-    </script>
+<div class="qr-header">
 
-    <style>
-        .back-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--bg-card);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
+<div class="qr-icon orange">
+<i class="fab fa-bitcoin"></i>
+</div>
 
-        .deposit-methods {
-            display: flex;
-            gap: 12px;
-        }
+<div>
+<div class="qr-title">Bitcoin Deposit</div>
+<div class="qr-subtitle">BTC Network</div>
+</div>
 
-        .deposit-method {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            padding: 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+</div>
 
-        .deposit-method.active {
-            border-color: var(--warning);
-            background: rgba(245, 158, 11, 0.1);
-        }
 
-        .deposit-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
+<div class="qr-code-container">
 
-        .deposit-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+<div class="qr-code">
 
-        .deposit-method span {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
+<img src="https://i.postimg.cc/pyNY2pvJ/IMG-20260307-WA0015.jpg" alt="QR Code">
 
-        .qr-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-        }
+</div>
 
-        .qr-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+<p class="qr-hint">
+Scan QR code to deposit
+</p>
 
-        .qr-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
+</div>
 
-        .qr-icon.orange { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
 
-        .qr-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
 
-        .qr-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+<div class="wallet-address">
 
-        .qr-code-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+<label>Wallet Address</label>
 
-        .qr-code {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 12px;
-            background: white;
-            border-radius: 12px;
-            padding: 12px;
-        }
+<div class="address-box">
 
-        .qr-code img {
-            width: 100%;
-            height: 100%;
-        }
+<span id="walletAddress">
+1pDjEtZ9hPZ2TrkfSZUgEFwcyVV8S7uSM
+</span>
 
-        .qr-hint {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
+<button class="copy-btn" onclick="copyAddress()">
+<i class="fas fa-copy"></i>
+</button>
 
-        .wallet-address {
-            margin-bottom: 20px;
-        }
+</div>
 
-        .wallet-address label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
+</div>
 
-        .address-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-        }
 
-        .address-box span {
-            flex: 1;
-            font-family: monospace;
-            font-size: 13px;
-            color: var(--text-primary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
 
-        .copy-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            background: var(--primary);
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
+<div class="deposit-info">
 
-        .deposit-info {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+<div class="info-item">
+<span class="info-label">Network</span>
+<span class="info-value">Bitcoin (BTC)</span>
+</div>
 
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-        }
+<div class="info-item">
+<span class="info-label">Minimum Deposit</span>
+<span class="info-value">0.001 BTC</span>
+</div>
 
-        .info-label {
-            color: var(--text-muted);
-        }
+<div class="info-item">
+<span class="info-label">Processing Time</span>
+<span class="info-value">10-60 minutes</span>
+</div>
 
-        .info-value {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
+</div>
 
-        .upload-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-        }
+</div>
 
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
+</div>
 
-        .upload-area:hover {
-            border-color: var(--primary);
-        }
 
-        .upload-area i {
-            font-size: 32px;
-            color: var(--primary);
-            margin-bottom: 12px;
-        }
 
-        .upload-area span {
-            display: block;
-            font-size: 14px;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
+<!-- Upload Proof -->
+<div class="section">
 
-        .upload-area small {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
+<div class="upload-card">
 
-        .upload-preview {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-        }
+<h3 style="font-size:14px;margin-bottom:16px;">
+Upload Payment Proof
+</h3>
 
-        .upload-preview img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
+<p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+Upload a screenshot of your successful transaction
+</p>
 
-        .remove-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--danger);
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-    </style>
+
+<div class="upload-area" onclick="document.getElementById('proofFile').click()">
+
+<input type="file" id="proofFile" class="hidden" accept="image/*" onchange="handleFileUpload(event)">
+
+<i class="fas fa-cloud-upload-alt"></i>
+
+<span>Click to upload or drag and drop</span>
+
+<small>PNG, JPG up to 5MB</small>
+
+</div>
+
+
+<div id="uploadPreview" class="upload-preview hidden">
+
+<img id="previewImage" src="" alt="Preview">
+
+<button class="remove-btn" onclick="removeUpload()">
+<i class="fas fa-times"></i>
+</button>
+
+</div>
+
+
+<button class="btn btn-primary btn-block" onclick="submitDeposit()" style="margin-top:16px;">
+<i class="fas fa-check-circle"></i> Submit Deposit
+</button>
+
+</div>
+
+</div>
+
+
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+
+<a href="activity.html" class="nav-item">
+<i class="fas fa-chart-line"></i>
+<span>Activity</span>
+</a>
+
+<a href="send.html" class="nav-item">
+<i class="fas fa-paper-plane"></i>
+<span>Transfer</span>
+</a>
+
+<a href="dashboard.html" class="nav-item">
+<i class="fas fa-home"></i>
+<span>Home</span>
+</a>
+
+<a href="cards.html" class="nav-item">
+<i class="fas fa-credit-card"></i>
+<span>Cards</span>
+</a>
+
+<a href="profile.html" class="nav-item">
+<i class="fas fa-user"></i>
+<span>Profile</span>
+</a>
+
+</nav>
+
+</div>
+
+
+
+<!-- Loading -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+<div class="loading-spinner"></div>
+<p>Processing...</p>
+</div>
+
+
+
+<script src="firebase-config.js"></script>
+
+<script>
+
+auth.onAuthStateChanged((user)=>{
+if(!user){
+window.location.href='login.html'
+}
+})
+
+
+function copyAddress(){
+
+const address=document.getElementById("walletAddress").textContent
+
+navigator.clipboard.writeText(address)
+
+showToast("Address copied")
+
+}
+
+
+
+function handleFileUpload(event){
+
+const file=event.target.files[0]
+
+if(file){
+
+const reader=new FileReader()
+
+reader.onload=function(e){
+
+document.getElementById("previewImage").src=e.target.result
+document.getElementById("uploadPreview").classList.remove("hidden")
+document.querySelector(".upload-area").classList.add("hidden")
+
+}
+
+reader.readAsDataURL(file)
+
+}
+
+}
+
+
+
+function removeUpload(){
+
+document.getElementById("proofFile").value=""
+document.getElementById("uploadPreview").classList.add("hidden")
+document.querySelector(".upload-area").classList.remove("hidden")
+
+}
+
+
+
+function submitDeposit(){
+
+const file=document.getElementById("proofFile").files[0]
+
+if(!file){
+showToast("Please upload payment proof")
+return
+}
+
+showToast("Deposit submitted for review!")
+
+setTimeout(()=>{
+removeUpload()
+},2000)
+
+}
+
+
+
+/* SIMPLE TOAST MESSAGE */
+
+function showToast(msg){
+
+const toast=document.createElement("div")
+
+toast.innerText=msg
+
+toast.style.position="fixed"
+toast.style.bottom="20px"
+toast.style.left="50%"
+toast.style.transform="translateX(-50%)"
+toast.style.background="#111"
+toast.style.color="#fff"
+toast.style.padding="12px 20px"
+toast.style.borderRadius="8px"
+toast.style.fontSize="14px"
+toast.style.zIndex="9999"
+
+document.body.appendChild(toast)
+
+setTimeout(()=>{
+toast.remove()
+},2500)
+
+}
+
+</script>
+
+
+
+<style>
+
+/* YOUR ORIGINAL CSS KEPT */
+
+.back-btn {
+width:40px;
+height:40px;
+border-radius:50%;
+background:var(--bg-card);
+display:flex;
+align-items:center;
+justify-content:center;
+text-decoration:none;
+}
+
+.deposit-methods {
+display:flex;
+gap:12px;
+}
+
+.deposit-method {
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:8px;
+padding:16px;
+background:var(--bg-card);
+border:1px solid var(--border);
+border-radius:12px;
+cursor:pointer;
+transition:all .3s;
+}
+
+.deposit-method.active {
+border-color:var(--warning);
+background:rgba(245,158,11,.1);
+}
+
+.deposit-icon {
+width:48px;
+height:48px;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+}
+
+.deposit-icon.orange { background:rgba(245,158,11,.2);color:var(--warning); }
+
+.deposit-method span {
+font-size:12px;
+color:var(--text-secondary);
+}
+
+.qr-card {
+background:var(--bg-card);
+border:1px solid var(--border);
+border-radius:16px;
+padding:20px;
+}
+
+.qr-header {
+display:flex;
+align-items:center;
+gap:12px;
+margin-bottom:20px;
+}
+
+.qr-icon {
+width:48px;
+height:48px;
+border-radius:12px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+}
+
+.qr-icon.orange { background:rgba(245,158,11,.2);color:var(--warning); }
+
+.qr-title {
+font-size:16px;
+font-weight:600;
+}
+
+.qr-subtitle {
+font-size:12px;
+color:var(--text-muted);
+}
+
+.qr-code-container {
+text-align:center;
+margin-bottom:20px;
+}
+
+.qr-code {
+width:200px;
+height:200px;
+margin:0 auto 12px;
+background:white;
+border-radius:12px;
+padding:12px;
+}
+
+.qr-code img {
+width:100%;
+height:100%;
+}
+
+.qr-hint {
+font-size:12px;
+color:var(--text-muted);
+}
+
+.wallet-address {
+margin-bottom:20px;
+}
+
+.wallet-address label {
+display:block;
+font-size:12px;
+color:var(--text-muted);
+margin-bottom:8px;
+}
+
+.address-box {
+display:flex;
+align-items:center;
+gap:12px;
+background:var(--bg-secondary);
+border:1px solid var(--border);
+border-radius:12px;
+padding:12px 16px;
+}
+
+.address-box span {
+flex:1;
+font-family:monospace;
+font-size:13px;
+color:var(--text-primary);
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.copy-btn {
+width:36px;
+height:36px;
+border-radius:8px;
+background:var(--primary);
+border:none;
+color:white;
+cursor:pointer;
+}
+
+.deposit-info {
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.info-item {
+display:flex;
+justify-content:space-between;
+font-size:13px;
+}
+
+.info-label {
+color:var(--text-muted);
+}
+
+.info-value {
+color:var(--text-primary);
+font-weight:500;
+}
+
+.upload-card {
+background:var(--bg-card);
+border:1px solid var(--border);
+border-radius:16px;
+padding:20px;
+}
+
+.upload-area {
+border:2px dashed var(--border);
+border-radius:12px;
+padding:32px;
+text-align:center;
+cursor:pointer;
+transition:all .3s;
+}
+
+.upload-area:hover {
+border-color:var(--primary);
+}
+
+.upload-area i {
+font-size:32px;
+color:var(--primary);
+margin-bottom:12px;
+}
+
+.upload-area span {
+display:block;
+font-size:14px;
+color:var(--text-primary);
+margin-bottom:4px;
+}
+
+.upload-area small {
+font-size:11px;
+color:var(--text-muted);
+}
+
+.upload-preview {
+position:relative;
+border-radius:12px;
+overflow:hidden;
+}
+
+.upload-preview img {
+width:100%;
+height:200px;
+object-fit:cover;
+}
+
+.remove-btn {
+position:absolute;
+top:8px;
+right:8px;
+width:32px;
+height:32px;
+border-radius:50%;
+background:var(--danger);
+border:none;
+color:white;
+cursor:pointer;
+}
+
+</style>
+
 </body>
 </html>
