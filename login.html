@@ -91,8 +91,8 @@
         <div class="loading-spinner"></div>
         <p>Signing in...</p>
     </div>
+<script src="firebase-config.js"></script>
 
-    <script src="firebase-config.js"></script>
 <script>
 function togglePassword() {
     const passwordInput = document.getElementById('password');
@@ -113,6 +113,7 @@ function socialLogin(provider) {
     showToast(`${provider} login coming soon!`, 'info');
 }
 
+
 // LOGIN FORM
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -123,59 +124,91 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     document.getElementById('loadingOverlay').classList.remove('hidden');
     
     try {
+
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
-        
+
         const userDoc = await db.collection('users').doc(user.uid).get();
-        
-        if (userDoc.exists) {
-            const userData = userDoc.data();
-            
-            await db.collection('users').doc(user.uid).update({
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            });
 
-            document.getElementById('loadingOverlay').classList.add('hidden');
-
-            // 🔥 ROLE-BASED REDIRECT
-            if (userData.role === 'admin') {
-                window.location.href = 'admin.html';
-            } else {
-                window.location.href = 'dashboard.html';
-            }
-        } else {
+        if (!userDoc.exists) {
             document.getElementById('loadingOverlay').classList.add('hidden');
             showToast("User record not found.", "error");
+            return;
         }
 
+        const userData = userDoc.data();
+
+        await db.collection('users').doc(user.uid).update({
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        document.getElementById('loadingOverlay').classList.add('hidden');
+
+
+        // 🔐 ADMIN LOGIN (NO VERIFICATION)
+        if (userData.role === 'admin') {
+
+            window.location.href = "admin.html";
+            return;
+
+        }
+
+
+        // 👤 USER LOGIN → SEND EMAIL VERIFICATION LINK
+        const actionCodeSettings = {
+            url: window.location.origin + "/dashboard.html",
+            handleCodeInApp: true
+        };
+
+        await auth.sendSignInLinkToEmail(email, actionCodeSettings);
+
+        localStorage.setItem('emailForSignIn', email);
+
+        showToast("Verification link sent to your email. Please check your inbox.", "success");
+
+        auth.signOut();
+
+
     } catch (error) {
+
         document.getElementById('loadingOverlay').classList.add('hidden');
         
         let message = 'Login failed. Please try again.';
+
         if (error.code === 'auth/user-not-found') message = 'No account found with this email.';
         if (error.code === 'auth/wrong-password') message = 'Incorrect password.';
         if (error.code === 'auth/invalid-email') message = 'Invalid email address.';
         if (error.code === 'auth/user-disabled') message = 'This account has been disabled.';
-        
+
         showToast(message, 'error');
+
     }
+
 });
+
 
 // AUTO REDIRECT IF ALREADY LOGGED IN
 auth.onAuthStateChanged((user) => {
-    if (user) {
-        db.collection('users').doc(user.uid).get().then((doc) => {
-            if (doc.exists) {
-                const userData = doc.data();
 
-                // 🔥 ROLE-BASED REDIRECT
-                if (userData.role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
-            }
-        });
-    }
+    if (!user) return;
+
+    db.collection('users').doc(user.uid).get().then((doc) => {
+
+        if (!doc.exists) return;
+
+        const userData = doc.data();
+
+        if (userData.role === 'admin') {
+
+            window.location.href = "admin.html";
+
+        } else {
+
+            window.location.href = "dashboard.html";
+
+        }
+
+    });
+
 });
 </script>
