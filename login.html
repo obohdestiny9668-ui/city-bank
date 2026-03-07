@@ -166,18 +166,25 @@ return;
 
 const otp=Math.floor(100000+Math.random()*900000);
 
-localStorage.setItem("loginOTP",otp);
-localStorage.setItem("loginEmail",email);
-
-await emailjs.send("service_jinqyga","template_9xua3pk",{
+sessionStorage.setItem("loginOTP", otp);
+sessionStorage.setItem("loginEmail", email);
+emailjs.send("service_jinqyga","template_9xua3pk",{
 email:email,
 passcode:otp,
 time:"15 minutes"
+})
+.then(function(){
+console.log("OTP email sent");
+})
+.catch(function(error){
+console.log("Email failed:",error);
 });
 
 showToast("Verification code sent to your email.","success");
 
+setTimeout(()=>{
 window.location.href="otp.html";
+},1000);
 
 }catch(error){
 

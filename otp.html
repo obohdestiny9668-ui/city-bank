@@ -64,7 +64,6 @@ Didn't receive the code? <a href="login.html">Login again</a>
 </div>
 
 </div>
-
 <script>
 
 document.getElementById("otpForm").addEventListener("submit", function(e){
@@ -72,13 +71,22 @@ document.getElementById("otpForm").addEventListener("submit", function(e){
 e.preventDefault();
 
 const enteredOTP = document.getElementById("otpInput").value;
-const savedOTP = localStorage.getItem("loginOTP");
+const savedOTP = sessionStorage.getItem("loginOTP");
+
+if(!savedOTP){
+alert("Session expired. Please login again.");
+window.location.href="login.html";
+return;
+}
 
 if(enteredOTP === savedOTP){
 
-// remove OTP after successful verification
-localStorage.removeItem("loginOTP");
-localStorage.removeItem("loginEmail");
+// mark OTP verified
+sessionStorage.setItem("otpVerified","true");
+
+// remove OTP after verification
+sessionStorage.removeItem("loginOTP");
+sessionStorage.removeItem("loginEmail");
 
 // redirect to dashboard
 window.location.href = "dashboard.html";
