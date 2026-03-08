@@ -103,10 +103,14 @@ Don't have an account? <a href="register.html">Register</a>
 <div class="loading-spinner"></div>
 <p>Signing in...</p>
 </div>
-
 <script src="firebase-config.js"></script>
 
 <script>
+
+// clear previous OTP session
+sessionStorage.removeItem("loginOTP");
+sessionStorage.removeItem("loginEmail");
+sessionStorage.removeItem("otpVerified");
 
 function togglePassword(){
 
